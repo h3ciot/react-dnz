@@ -1,0 +1,23 @@
+.dragzoom {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+.dragzoom .drag-wrap {
+  z-index: 1;
+}
+.dragzoom .drag-wrap .react-draggable {
+  width: 100%;
+  height: 100%;
+}
+.dragzoom .scaleNum {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 22px;
+}
+.dragPoint {
+  transform: none !important;
+}

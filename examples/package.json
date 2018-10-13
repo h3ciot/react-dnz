@@ -1,0 +1,12 @@
+{
+  "name": "examples",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --open --hot --config webpack.config.js --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "lizhangrui",
+  "license": "ISC"
+}
