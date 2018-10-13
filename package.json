@@ -10,8 +10,12 @@
     "start": "cd examples && yarn start",
     "test": "jest"
   },
-  "author": "h3ciot",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/h3ciot/react-dnz.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/h3ciot/react-dnz",
   "dependencies": {
     "react-draggable": "^3.0.5"
   },
