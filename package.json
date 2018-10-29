@@ -17,7 +17,7 @@
   "license": "MIT",
   "homepage": "https://github.com/h3ciot/react-dnz",
   "dependencies": {
-    "react-draggable": "^2.2.6"
+    "react-draggable": "^3.0.5"
   },
   "devDependencies": {
     "babel": "^6.23.0",
