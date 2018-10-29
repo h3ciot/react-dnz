@@ -85,7 +85,7 @@ export default class Dragzoom extends React.Component<Props, State> {
   calculateNum: number = 1 // 实际缩放比例
   initPosition: Position = { x: 0, y: 0 } // 图片初始化的位置
   lastPosition: Position = { x: 0, y: 0 } // 图片上一次位置
-  
+
   lastScale: {mouseX: number, mouseY: number}  // 鼠标移动后在图片中的位置
   refreshScale: {mouseX: number, mouseY: number} // 缩放后在图片中的位置
   currentPolygonPath: Path = [] // 当前自定义图层路径，计算之后的虚拟路径
@@ -113,7 +113,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     }
     this.resetAllData()
   }
-  
+
   componentDidMount() {
     this.dawingContainer.oncontextmenu = stopRightKey;
     if (this.props.scaleable) { // 缩放
@@ -172,7 +172,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     const lastSize = { ...uninitialSize }
     this.setState({ currentSize, lastSize })
   }
-  
+
   /**
    * 重置图片位置，重新获取大小
    */
@@ -202,7 +202,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     const { mouseX: lastX, mouseY: lastY } = this.refreshScale  // 缩放后在图片中的位置
     if (mouseX === lastX && mouseY === lastY) { // 鼠标位置已经移动
       const { left, top } = getinlinePosition(this.drag)
-      
+
       mouseX = Math.max(mouseX - left - x, 0)
       mouseY = Math.max(mouseY - top - y, 0)
     } else {
@@ -373,8 +373,9 @@ export default class Dragzoom extends React.Component<Props, State> {
     const isupdate = this.initImage()
     // 获取图片在屏幕中的位置
     // this.containerPosition = getinlinePosition(this.drag)
+    if(isupdate) this.onSizeChange(this.initImageSize, this.initImageSize, this.initPosition)
   }
-  
+
   imageOnLoad = (e: Event) => {
     const { target } = e
     if (target instanceof HTMLImageElement) {
@@ -443,7 +444,7 @@ export default class Dragzoom extends React.Component<Props, State> {
       /****** 自定义图层操作函数开始 ******/
   /*******************************************/
 
-  
+
   /** 自定义图层拖动开始 path为真实路径 */
   onPolygonDragStart = (id: string, path: Path, e: MouseEvent) => {
     const { childDragProps } = this.state
@@ -505,7 +506,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     this.currentPolygonPath = path
   }
 
-  
+
   /*******************************************/
       /****** 自定义图层操作函数结束 ******/
   /*******************************************/
@@ -577,7 +578,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     }
     return <DragzoomCanvas {...canvasProps} />
   }
-  
+
   render() {
     const { img, polygonDragDisabled } = this.props
     const {
