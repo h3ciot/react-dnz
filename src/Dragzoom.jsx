@@ -376,13 +376,43 @@ export default class Dragzoom extends React.Component<Props, State> {
     if(isupdate) this.onSizeChange(this.initImageSize, this.initImageSize, this.initPosition)
   }
 
-  imageOnLoad = (e: Event) => {
-    const { target } = e
+  dataURLtoBlob = (dataurl: string) => {
+    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
+
+  imageOnLoad = (e: Event, img: string) => {
+    const index = img.lastIndexOf('.');
+    const ext = img.substr(index + 1);
+    const index2 = img.lastIndexOf('/');
+    const ext2 = img.substr(index2 + 1, 3);
+    const { target } = e;
+
     if (target instanceof HTMLImageElement) {
       const { naturalWidth, naturalHeight } = target
-      const actualSize = { width: naturalWidth, height: naturalHeight }
-      this.actualImageSize = actualSize
-      this.init()
+      let actualSize = { width: naturalWidth, height: naturalHeight }
+      if (ext2 === 'svg' || ext2 === 'SVG') {
+        const reader = new FileReader();
+        reader.readAsText(this.dataURLtoBlob(img));
+        reader.onload= () => {
+          const result = reader.result.toString()
+          const i = result.indexOf('viewBox')
+          const str1 = result.substr(i + 9);
+          const j = str1.indexOf('"')
+          const str2 = str1.substr(0, j);
+          const sizeArr = str2.split(' ');
+          actualSize = { width: parseInt(sizeArr[2]), height: parseInt(sizeArr[3]) }
+          this.actualImageSize = actualSize
+          this.init()
+        }
+      } else {
+        this.actualImageSize = actualSize
+        this.init()
+      }
     }
   }
 
@@ -597,7 +627,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     const showScale = (scaleNum * 100).toFixed(0)
     return (
       <div ref={(ele?: Object) => { ele ? this.dawingContainer = ele : null }} className="dragzoom" id="dragzoom" style={{ position: 'relative', ...this.props.style }} >
-        <img ref={(rn: any) => this.imageElement = rn} src={img} onLoad={this.imageOnLoad} style={{display: 'none'}} />
+        <img ref={(rn: any) => this.imageElement = rn} src={img} onLoad={(e) => this.imageOnLoad(e, img)} style={{display: 'none'}} />
         <div className="drag-wrap" ref={ rn => this.drag = rn} style={{ height: '100%', width: '100%', position: 'relative' }}>
           {this.renderCanvas()}
           {React.Children.map(this.props.children, this.renderCanvasPolygon)}

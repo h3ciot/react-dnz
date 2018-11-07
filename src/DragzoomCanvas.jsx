@@ -54,10 +54,6 @@ export default class DragzoomCanvas extends React.Component<Props, State> {
     context2D.clearRect(0, 0, containerSize.width, containerSize.height)
     context2D.drawImage(
       imageElement,
-      0,
-      0,
-      actualImageSize.width,
-      actualImageSize.height,
       currentPosition.x, // 图像位置x
       currentPosition.y, // 图像位置y
       currentSize.width,
