@@ -400,12 +400,24 @@ export default class Dragzoom extends React.Component<Props, State> {
         reader.readAsText(this.dataURLtoBlob(img));
         reader.onload= () => {
           const result = reader.result.toString()
-          const i = result.indexOf('viewBox')
-          const str1 = result.substr(i + 9);
-          const j = str1.indexOf('"')
-          const str2 = str1.substr(0, j);
-          const sizeArr = str2.split(' ');
-          actualSize = { width: parseInt(sizeArr[2]), height: parseInt(sizeArr[3]) }
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(result, "image/svg+xml");
+
+          if (doc.rootElement) {
+            const viewBox = doc.rootElement.getAttribute('viewBox');
+            if (viewBox) {
+              const sizeArr = viewBox.split(' ');
+              const sizeArr2 = viewBox.split(',');
+              if (sizeArr2.length === 4) {
+                actualSize = { width: parseInt(sizeArr2[2] - sizeArr2[0]), height: parseInt(sizeArr2[3] - sizeArr2[1]) }
+              } else if (sizeArr.length >= 4) {
+                const arr = sizeArr.filter((item) => item !== '');
+                if (arr.length === 4) {
+                  actualSize = { width: parseInt(arr[2] - arr[0]), height: parseInt(arr[3] - arr[1]) }
+                }
+              }
+            }
+          }
           this.actualImageSize = actualSize
           this.init()
         }
