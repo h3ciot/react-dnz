@@ -30,6 +30,7 @@ type Props = {
   onPolygonDragStop: Function,
   controlPaint: (ctx: CanvasRenderingContext2D, props:{ id: string, path: Path}) => boolean | 0 | 1, // 控制自定义图层的绘画
   dragControlPaint: (ctx: CanvasRenderingContext2D, props:{ id: string, path: Path}) => boolean | 0 | 1, // 控制拖动时自定义图层的绘画
+  getSVGSize?: (size: Size) => mixed,
   maxZoom: number,
   children: any,
   polygonDragDisabled: boolean,
@@ -418,6 +419,7 @@ export default class Dragzoom extends React.Component<Props, State> {
               }
             }
           }
+          this.props.getSVGSize(actualSize);
           this.actualImageSize = actualSize
           this.init()
         }
