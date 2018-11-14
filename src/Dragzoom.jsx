@@ -392,37 +392,31 @@ export default class Dragzoom extends React.Component<Props, State> {
     const index2 = img.lastIndexOf('/');
     const ext2 = img.substr(index2 + 1, 3);
     const { target } = e;
-
     if (target instanceof HTMLImageElement) {
       const { naturalWidth, naturalHeight } = target
       let actualSize = { width: naturalWidth, height: naturalHeight }
       if (ext2 === 'svg' || ext2 === 'SVG') {
-        const reader = new FileReader();
-        reader.readAsText(this.dataURLtoBlob(img));
-        reader.onload= () => {
-          const result = reader.result.toString()
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(result, "image/svg+xml");
-
-          if (doc.rootElement) {
-            const viewBox = doc.rootElement.getAttribute('viewBox');
-            if (viewBox) {
-              const sizeArr = viewBox.split(' ');
-              const sizeArr2 = viewBox.split(',');
-              if (sizeArr2.length === 4) {
-                actualSize = { width: parseInt(sizeArr2[2] - sizeArr2[0]), height: parseInt(sizeArr2[3] - sizeArr2[1]) }
-              } else if (sizeArr.length >= 4) {
-                const arr = sizeArr.filter((item) => item !== '');
-                if (arr.length === 4) {
-                  actualSize = { width: parseInt(arr[2] - arr[0]), height: parseInt(arr[3] - arr[1]) }
-                }
+        const result = window.atob(img.substr(img.indexOf(',') + 1))
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(result, "image/svg+xml");
+        if (doc.rootElement) {
+          const viewBox = doc.rootElement.getAttribute('viewBox');
+          if (viewBox) {
+            const sizeArr = viewBox.split(' ');
+            const sizeArr2 = viewBox.split(',');
+            if (sizeArr2.length === 4) {
+              actualSize = { width: parseInt(sizeArr2[2] - sizeArr2[0]), height: parseInt(sizeArr2[3] - sizeArr2[1]) }
+            } else if (sizeArr.length >= 4) {
+              const arr = sizeArr.filter((item) => item !== '');
+              if (arr.length === 4) {
+                actualSize = { width: parseInt(arr[2] - arr[0]), height: parseInt(arr[3] - arr[1]) }
               }
             }
           }
-          this.props.getSVGSize(actualSize);
-          this.actualImageSize = actualSize
-          this.init()
         }
+        this.props.getSVGSize(actualSize);
+        this.actualImageSize = actualSize;
+        this.init()
       } else {
         this.actualImageSize = actualSize
         this.init()
