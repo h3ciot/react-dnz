@@ -24,6 +24,7 @@ type Props = {
     onControlledDrag: Function,
   },
   children: any,
+  containersStyle: Object,
 }
 
 type State = {
@@ -60,7 +61,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
     }
   }
 
-  /** 
+  /**
    * 初始化图片位置跟改变图片位置,父容器大小变化的时候调用, 获取图片跟点位位置
    * @param position 图片的最新位置
    * sclakX,sclaKY 为 图片距离上次移动的距离
@@ -91,7 +92,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
     this.setState({ controlledPositions })
   }
 
-  /** 
+  /**
    * 父元素位置改变时调用
    * sclakX,sclaKY 为 图片距离上次移动的距离
    * @tooltip 图片位置为发生更改时也会执行，需要修改
@@ -143,7 +144,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
   }
 
 
-  
+
   /** 获取边界值 */
   getboundPosition = (id:string): Point => {
     let outBound = false
@@ -221,7 +222,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
 
   render() {
     return (
-      <div style={{ position: 'absolute', top: '0px', left: '0px', height: '0px' }}>
+      <div style={{ ...this.props.containersStyle, position: 'absolute', top: '0px', left: '0px', height: '0px' }}>
         {React.Children.map(this.props.children, this.renderItem)}
       </div>
     )

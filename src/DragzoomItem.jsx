@@ -14,6 +14,7 @@ type Props = {
   disabled: boolean,
   onDrag: Function,
   onDragStop: Function,
+  dragItemStyle: Object,
 }
 
 const DragzoomItem = (props: Props) => {
@@ -22,6 +23,7 @@ const DragzoomItem = (props: Props) => {
     position: { x, y },
     pointsDisabled,
     disabled,
+    dragItemStyle,
   } = props
   const isEdit = !pointsDisabled && !disabled
   return (
@@ -30,7 +32,7 @@ const DragzoomItem = (props: Props) => {
       onStop={(e, position: Position) => props.onDragStop(id)}
       onDrag={isEdit ? (e, position: Position) => props.onDrag(id, position) : () => false}
     >
-      <div className="dragPoint" style={{ position: 'absolute', top: y, left: x }} data-id={id}>
+      <div className="dragPoint" style={{ ...dragItemStyle, position: 'absolute', top: y, left: x }} data-id={id}>
         {props.children}
       </div>
     </Draggable>
