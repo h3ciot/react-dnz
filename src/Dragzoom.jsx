@@ -289,7 +289,7 @@ export default class Dragzoom extends React.Component<Props, State> {
   onSizeChange = (initSize: Size, newSize: Size, position: Position) => {
     this.calculateNum = newSize.width/this.actualImageSize.width
     this.setState({currentSize: newSize, lastSize: newSize, currentPosition: position})
-    this.props.onSizeChange(newSize)
+    this.props.onSizeChange({...newSize, currentPosition: position})
   }
 
   /** 计算图片的缩放值 */
@@ -469,7 +469,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     } else { top = (initHeight - currentSize.height) / 2 }
     dragProps.position = { x: left, y: top }
     this.setState({ dragProps, currentPosition: { x: left, y: top } })
-    this.props.onDragStop && this.props.onDragStop({x, y})
+    this.props.onDragStop && this.props.onDragStop({ x: left, y: top })
   }
 
   /*******************************************/
