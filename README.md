@@ -22,7 +22,7 @@ $ npm run build-es
 
 | props     | Description                              | Type       | Default |
 |-----------|------------------------------------------|------------|---------|
-| img | 背景图url | string | '' |
+| img | 背景图url | string(svg格式的需要传入经过base64编码后的dataUrl) | '' |
 | style | dragzoom第一层div的样式 | HTMLStyleElement | {} |
 | maxZoom | 最大缩放层级 | number | 2 |
 | scaleable | 是否可以缩放 | boolean | true |
@@ -34,7 +34,7 @@ $ npm run build-es
 | onPolygonDragStop | 自定义图层停止拖动的回调 | (context:CanvasRenderingContext2D ,props:{id:string,path:Path}) => mixed | - |
 | controlPaint | 控制自定义图层的绘画 | (context:CanvasRenderingContext2D ,props:{id:string,path:Path}) => mixed | - |
 | dragControlPaint | 控制拖拽时自定义图层的绘画 | String | - |
-
+| getSVGSize | 获取svg格式的背景图的实际大小 | (size: { width: number, height: number }) => mixed | - |
 ## DragzoomPolygon
 
 | props     | Description                              | Type       | Default |

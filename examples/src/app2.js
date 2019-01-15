@@ -1,5 +1,5 @@
 import React from 'react'
-import Dragzoom, { DragzoomPolygon, DragzoomItems, DragzoomItem } from 'react-dragzoom'
+import Dragzoom, { DragzoomPolygon, DragzoomItems, DragzoomItem } from 'react-dnz'
 
 const Polygon = DragzoomPolygon.Polygon
 export default class App extends React.Component{
