@@ -1,5 +1,5 @@
 import React from 'react'
-import Dragzoom, { DragzoomPolygon, DragzoomItems, DragzoomItem } from 'react-dragzoom'
+import Dragzoom, { DragzoomPolygon, DragzoomItems, DragzoomItem } from 'react-dnz'
 
 const Polygon = DragzoomPolygon.Polygon
 export default class App extends React.Component{
@@ -13,7 +13,7 @@ export default class App extends React.Component{
       currentPolygon: [],
     }
   }
-  
+
 
   componentDidMount() {
     setTimeout(() => {
@@ -82,7 +82,7 @@ export default class App extends React.Component{
         <Dragzoom
           key="1"
           img={this.state.img}
-          polygonDragDisabled={false}
+          polygonDragDisabled={true}
           controlPaint={this.controlPaint}
           dragControlPaint={this.dragControlPaint}
         >
@@ -99,11 +99,11 @@ export default class App extends React.Component{
             //   <Polygon key={index+1} path={item}/>
             // )
           }
-            { 
+            {
               // {new Array(10).fill(null).map((item, index) =>
             //   <Polygon key={index+2} polygonDrag id={index+2} path={[[100,100],[100,300],[300,100],[300,300]]}/>
             // )}
-            
+
             <Polygon id='1' polygonDrag path={[[200,200],[200,400],[400,200],[400,400]]}/> }
             {//<Polygon key='10' polygonDrag path={this.state.currentPolygon} />
           }

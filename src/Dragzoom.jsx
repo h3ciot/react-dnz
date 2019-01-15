@@ -454,19 +454,15 @@ export default class Dragzoom extends React.Component<Props, State> {
     const initWidth = this.containerSize.width
     const initHeight = this.containerSize.height
 
-    // 拖动块的宽高跟parent宽高的差值,
     /** TODO:下面的函数纯粹为了dragstop的时候可以有重置的位置，可以改成非state */
-    const width = currentSize.width - initWidth
-    const height = currentSize.height - initHeight
-    if (currentSize.width > initWidth) { // x超出父元素
-      if (x >= 0) { left = 0 }
-      if (x < -width) { left = -width }
-    } else { left = (initWidth - currentSize.width) / 2 }
-
-    if (currentSize.height > initHeight) { // y超出父元素
-      if (y >= 0) { top = 0 }
-      if (y < -height) { top = -height }
-    } else { top = (initHeight - currentSize.height) / 2 }
+    if (x + currentSize.width < 10 || x > initWidth - 10) {
+      if (x < 0) { left = -currentSize.width + 10}
+      if (x > 0) { left = initWidth - 10 }
+    }
+    if (y + currentSize.height < 10 || y > initHeight - 10) {
+      if (y < 0) { top = -currentSize.height + 10}
+      if (y > 0) { top = initHeight - 10 }
+    }
     dragProps.position = { x: left, y: top }
     this.setState({ dragProps, currentPosition: { x: left, y: top } })
     this.props.onDragStop && this.props.onDragStop({ x: left, y: top })
