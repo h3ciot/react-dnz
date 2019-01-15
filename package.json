@@ -1,6 +1,10 @@
 {
   "name": "react-dnz",
+<<<<<<< HEAD
   "version": "1.1.0",
+=======
+  "version": "1.1.1",
+>>>>>>> 版本号更新
   "description": "React drag and zoom component",
   "main": "index.js",
   "scripts": {
