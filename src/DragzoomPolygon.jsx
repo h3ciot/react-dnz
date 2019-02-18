@@ -85,7 +85,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     addEvent(this.canvas, 'mousemove', this.mouseMove)
     addEvent(this.canvas, 'mouseup', this.mouseUp)
     addEvent(this.canvas, 'dblclick', this.doubleClick)
-    
+
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -93,7 +93,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
       this.updataCanvas(nextProps)
     }
   }
-  
+
   componentWillUnmount() {
     removeEvent(this.canvas, 'mousedown', this.mouseDown)
     removeEvent(this.canvas, 'mouseup', this.mouseUp)
@@ -200,7 +200,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
   }
 
   renderPolygon = (path: Path, childProps: Object) => {
-    const { capture, id, polygonDrag, path: childPath, color, shape } = childProps
+    const { capture, id, polygonDrag, path: childPath, color, shape, vertex = true } = childProps
     const context2D = this.context2D
     context2D.save()
     context2D.beginPath()
@@ -234,17 +234,19 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     context2D.fill()
     context2D.stroke()
     context2D.closePath()
-    path.forEach((point, index) => {
-      const [x, y] = point
-      context2D.beginPath()
-      context2D.lineWidth=3    //重新设置画笔  
-      context2D.strokeStyle="green"
-      context2D.fillStyle="rgb(255,255,255)"   //设置填充的颜色  
-      context2D.arc(x,y,3,0,2*Math.PI)
-      context2D.stroke()
-      context2D.fill()
-      context2D.closePath()
-    })
+    if (vertex) {
+      path.forEach((point, index) => {
+        const [x, y] = point
+        context2D.beginPath()
+        context2D.lineWidth=3    //重新设置画笔
+        context2D.strokeStyle="green"
+        context2D.fillStyle="rgb(255,255,255)"   //设置填充的颜色
+        context2D.arc(x,y,3,0,2*Math.PI)
+        context2D.stroke()
+        context2D.fill()
+        context2D.closePath()
+      })
+    }
   }
 
   updataCanvas = (props: Props) => {
@@ -260,7 +262,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     const context2D = this.context2D
     context2D.clearRect(0, 0, width, height)
     React.Children.forEach(props.children, child => {
-      let { path, polygonDrag, color, shape } = child.props
+      let { path, polygonDrag, color, shape, vertex } = child.props
       const id = child.key
       if (this.dragPolygon[id]) return  // 当前是否有处于拖动状态的图形
       const propsEqual = isPropsEqual({path:this.lastPropsPath[id]}, { path })
@@ -270,7 +272,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
         this.childPath[id] = path
       }
       path = this.childPath[id] // 从childPath里取出对应的路径
-      this.renderPolygon(props.calculateAllPosition(path), { capture, id, path, polygonDrag, color, shape })
+      this.renderPolygon(props.calculateAllPosition(path), { capture, id, path, polygonDrag, color, shape, vertex })
     })
     this.position = void 0
   }
