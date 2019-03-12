@@ -59,6 +59,16 @@ export default class DragzoomItems extends React.Component<Props, State> {
     } else if( !isEuqal(this.props.currentPosition, nextProps.currentPosition) ) {
       this.onParentPositionChange(this.props, nextProps)
     }
+    if (this.props.children !== nextProps.children) {
+      const controlledPositions = {}
+      React.Children.forEach(nextProps.children, (child) => {
+        const { key: id, props: childProps } = child
+        const { position, offset = { top: 0, left: 0} } = childProps
+        controlledPositions[id] = this.calculatePosition({...position, offset})
+        controlledPositions[id].id = id
+      })
+      this.setState({controlledPositions})
+    }
   }
 
   /**
