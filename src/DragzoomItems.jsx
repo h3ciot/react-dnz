@@ -64,7 +64,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
       React.Children.forEach(nextProps.children, (child) => {
         const { key: id, props: childProps } = child
         const { position, offset = { top: 0, left: 0} } = childProps
-        controlledPositions[id] = this.calculatePosition({...position, offset})
+        controlledPositions[id] = this.calculatePosition({...position, offset}, nextProps)
         controlledPositions[id].id = id
       })
       this.setState({controlledPositions})
@@ -120,7 +120,6 @@ export default class DragzoomItems extends React.Component<Props, State> {
     })
     this.setState({ controlledPositions })
   }
-
   /**
    * 进行点位的坐标偏移，点位初始化时需要进行偏移操作，往后操作的都是偏移后的点，
    * 进行缩放时，减去的偏移量需要重新加回后进行计算
@@ -135,9 +134,10 @@ export default class DragzoomItems extends React.Component<Props, State> {
   /**
    * 传入未经计算过的点位信息，返回相对于拖动层的图片位置,带偏移量的点需要进行偏移校正
    * @param point 点位信息
+   * @param props props,包含定位信息
    */
-  calculatePosition = (point: Point): Point => {
-    const { currentPosition, currentSize, actualImageSize } = this.props
+  calculatePosition = (point: Point, props = this.props): Point => {
+    const { currentPosition, currentSize, actualImageSize } = props
     const { x, y, offset } = this.shiftPoint(point)
     // 当前点位距离图片的长宽（位置）
     const width = point.x

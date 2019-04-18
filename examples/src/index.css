@@ -1,0 +1,8 @@
+@import '~antd/dist/antd.css';
+
+#dragzoom {
+    border: 1px solid black;
+}
+.ant-popover {
+    z-index: 2;
+}

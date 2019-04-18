@@ -1,16 +1,21 @@
 import React from 'react'
 import Dragzoom, { DragzoomPolygon, DragzoomItems, DragzoomItem } from 'react-dnz'
-
+import { Popover, Button } from 'antd';
+import './index.css';
 const Polygon = DragzoomPolygon.Polygon
 export default class App extends React.Component{
+  drawingRef: Object;
   constructor(props){
     super(props);
     this.startPosition = null
     this.onceDrag = []
+    this.drawingRef = React.createRef();
     this.state = {
       img: 'http://www.pconline.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
       polygonList: [],
       currentPolygon: [],
+      x: 1300,
+      y: 1000,
     }
   }
 
@@ -51,7 +56,7 @@ export default class App extends React.Component{
   }
 
   startMove = (positions) => {
-    console.log('mousemove')
+    // console.log('mousemove')
     this.setState({currentPolygon: [...this.onceDrag, positions[1]]})
   }
 
@@ -74,13 +79,17 @@ export default class App extends React.Component{
       currentPolygon: []
     })
   }
-
+  fixContent = (position, placement) => {
+    console.log(this.drawingRef);
+    this.drawingRef.current.fixContent(position, placement);
+  }
   render() {
     const { polygonList, currentPolygon } = this.state
     return (
       [
         <Dragzoom
           key="1"
+          ref={this.drawingRef}
           img={this.state.img}
           polygonDragDisabled={true}
           controlPaint={this.controlPaint}
@@ -109,8 +118,10 @@ export default class App extends React.Component{
           }
           </DragzoomPolygon>
           <DragzoomItems>
-            <DragzoomItem key={this.state.x || 10} disabled position={{x: this.state.x || 100, y: this.state.y || 100}} offset={{top:10,left:10}} >
-              <span style={{background:'#000',display:'inline-block',width:'20px',height:'20px'}} />
+            <DragzoomItem key="top" disabled position={{x: this.state.x, y: this.state.y}} offset={{top:10,left:10}} >
+              <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">
+                <Button onClick={() => this.fixContent({ x: this.state.x, y: this.state.y, width: 232, height: 334, offset:{top:10,left:10} }, 'bottomRight')}>topLeft</Button>
+              </Popover>
             </DragzoomItem>
             {/* <DragzoomItem key="4" position={{x:200, y:200}} offset={{top:10,left:10}} >
               <span style={{background:'#000',display:'inline-block',width:'20px',height:'20px'}}></span>

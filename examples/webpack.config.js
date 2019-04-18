@@ -25,7 +25,7 @@ module.exports = {
     contentBase: path.resolve(__dirname, 'dist'), // 编译后文件路径
     // hot: true, // 是否开启热替换
     host: 'localhost', // 主机
-    port: 3000,
+    port: 8888,
     inline : true, // 必须
     overlay: { // 页面显示警告和错误
       warnings: true,
@@ -125,7 +125,7 @@ module.exports = {
     symlinks: false,
     extensions: ['.js', '.jsx', 'json'],
     alias: {
-      'react-dragzoom': path.resolve(ROOT_PATH, 'src'),
+      'react-dnz': path.resolve(ROOT_PATH, 'src'),
     },
   },
   module: {

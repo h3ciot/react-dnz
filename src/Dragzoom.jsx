@@ -20,7 +20,7 @@ export type Path = Array<[number,number]>
 export type Point = {
   ['id' | 'key']: string, x: number, y: number, offset: {left: number, top: number}
 }
-
+export type placement = 'top' | 'left' | 'right' | 'bottom' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'leftTop' | 'leftBottom' | 'rightTop' | 'rightBottom'
 type Props = {
   img: string,
   style: HTMLStyleElement,
@@ -429,6 +429,128 @@ export default class Dragzoom extends React.Component<Props, State> {
     /****** 图层移动和点位拖动开始 ******/
   /*******************************************/
 
+  fixContent(position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: placement) {
+    const { x, y, width, height, offset } = position;
+    const rect = this.dawingContainer.getBoundingClientRect();
+    const { currentPosition, currentSize: { width: currentWidth } } = this.state
+    const { width: actualWidth } = this.actualImageSize
+    const scaleNum = currentWidth / actualWidth
+    const { x: positionX, y: positionY } = currentPosition
+    let offsetX = positionX, offsetY = positionY
+    const rightMargin = rect.width - x * scaleNum - positionX + offset.left,
+        leftMargin = x * scaleNum + positionX - offset.left,
+        topMargin = y * scaleNum + positionY - offset.top,
+    bottomMargin = rect.height - y * scaleNum - positionY + offset.top;
+    switch (placement) {
+      case "left":
+        if (leftMargin < width) {
+          offsetX += width - leftMargin
+        }
+        if (topMargin < height / 2) {
+          offsetY += height / 2  - topMargin;
+        } else if (bottomMargin < height / 2) {
+          offsetY -= height / 2 - bottomMargin;
+        }
+        break;
+      case "leftBottom":
+        if (leftMargin < width) {
+          offsetX += width - leftMargin
+        }
+        if (topMargin < height) {
+          offsetY += height - topMargin
+        }
+        break;
+      case "leftTop":
+        if (leftMargin < width) {
+          offsetX += width - leftMargin
+        }
+        if (bottomMargin < height) {
+          offsetY -= height - bottomMargin
+        }
+        break;
+      case "right":
+        if (rightMargin < width) {
+          offsetX -= width - rightMargin
+        }
+        if (topMargin < height / 2) {
+          offsetY += height / 2  - topMargin;
+        } else if (bottomMargin < height / 2) {
+          offsetY -= height / 2 - bottomMargin;
+        }
+        break;
+      case "rightBottom":
+        if (rightMargin < width) {
+          offsetX -= width - rightMargin
+        }
+        if (topMargin < height) {
+          offsetY += height - topMargin
+        }
+        break;
+      case "rightTop":
+        if (rightMargin < width) {
+          offsetX -= width - rightMargin
+        }
+        if (bottomMargin < height) {
+          offsetY -= height - bottomMargin
+        }
+        break;
+      case "top":
+        if (topMargin < height) {
+          offsetY += height - topMargin
+        }
+        if (leftMargin < width / 2) {
+          offsetX += width / 2  - leftMargin;
+        } else if (rightMargin < width / 2) {
+          offsetX -= width / 2 - rightMargin;
+        }
+        break;
+      case "topLeft":
+        if (topMargin < height) {
+          offsetY += height - topMargin
+        }
+        if (rightMargin < width) {
+          offsetX -= width - rightMargin
+        }
+          break;
+      case "topRight":
+        if (topMargin < height) {
+          offsetY += height - topMargin
+        }
+        if (leftMargin < width) {
+          offsetX += width - leftMargin
+        }
+        break;
+      case "bottom":
+        if (bottomMargin < height) {
+          offsetY -= height - bottomMargin
+        }
+        if (leftMargin < width / 2) {
+          offsetX += width / 2  - leftMargin;
+        } else if (rightMargin < width / 2) {
+          offsetX -= width / 2 - rightMargin;
+        }
+        break;
+      case "bottomLeft":
+        if (bottomMargin < height) {
+          offsetY -= height - bottomMargin
+        }
+        if (rightMargin < width) {
+          offsetX -= width - rightMargin
+        }
+        break;
+      case "bottomRight":
+        if (bottomMargin < height) {
+          offsetY -= height - bottomMargin
+        }
+        if (leftMargin < width) {
+          offsetX += width - leftMargin
+        }
+        break;
+      default:
+        break;
+    }
+    this.handleDragStop({ }, { x: offsetX, y: offsetY })
+  }
 
   /** 开始容器拖拽, 同时改变上面的点， 此时不能停止更新 */
   handleDrag = (e: Event, ui: Object) => {
@@ -587,7 +709,7 @@ export default class Dragzoom extends React.Component<Props, State> {
   }
 
   /** render 普通拖动点位 */
-  renderCommonItem = (child: any) => {
+  renderCommonItem = (child: any, index) => {
     const { width, height } = this.state.currentSize
     if (width === 0 || height === 0) { return }
     if (child && child.type && child.type.isDragItems) {
@@ -612,7 +734,6 @@ export default class Dragzoom extends React.Component<Props, State> {
     }
     return <DragzoomCanvas {...canvasProps} />
   }
-
   render() {
     const { img, polygonDragDisabled } = this.props
     const {
