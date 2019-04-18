@@ -35,6 +35,7 @@ $ npm run build-es
 | controlPaint | 控制自定义图层的绘画 | (context:CanvasRenderingContext2D ,props:{id:string,path:Path}) => mixed | - |
 | dragControlPaint | 控制拖拽时自定义图层的绘画 | String | - |
 | getSVGSize | 获取svg格式的背景图的实际大小 | (size: { width: number, height: number }) => mixed | - |
+| fixContent(实例方法)| 自适应弹出框内容(x,y为左上角定位) | (position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: 'top' &#166; 'left' &#166; 'right' &#166; 'bottom' &#166; 'topLeft' &#166; 'topRight' &#166; 'bottomLeft' &#166; 'bottomRight' &#166; 'leftTop' &#166; 'leftBottom' &#166; 'rightTop' &#166; 'rightBottom') {
 ## DragzoomPolygon
 
 | props     | Description                              | Type       | Default |
