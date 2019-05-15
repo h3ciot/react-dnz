@@ -74,6 +74,11 @@ export default class Dragzoom extends React.Component<Props, State> {
     onSizeChange: noop,
     onPolygonDragStop: noop,
     initScale: 1,
+    getSVGSize: noop,
+    onDragStop: noop,
+    onDrag: noop,
+    controlPaint: noop, // 控制自定义图层的绘画
+    dragControlPaint: noop, // 控制拖动时自定义图层的绘画
   }
   canvasPolygon: any
   dawingContainer = HTMLElement;
