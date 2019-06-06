@@ -37,6 +37,7 @@ type Props = {
   scaleable:boolean,
   draggable:boolean,
   initScale: number,
+  allowAnyClickToDrag: boolean,
 }
 
 type State = {
@@ -79,7 +80,9 @@ export default class Dragzoom extends React.Component<Props, State> {
     onDrag: noop,
     controlPaint: noop, // 控制自定义图层的绘画
     dragControlPaint: noop, // 控制拖动时自定义图层的绘画
+    allowAnyClickToDrag: false,
   }
+  dragRef: HTMLElement
   canvasPolygon: any
   dawingContainer = HTMLElement;
   drag: HTMLElement | null
@@ -740,7 +743,7 @@ export default class Dragzoom extends React.Component<Props, State> {
     return <DragzoomCanvas {...canvasProps} />
   }
   render() {
-    const { img, polygonDragDisabled } = this.props
+    const { img, polygonDragDisabled, allowAnyClickToDrag } = this.props
     const {
       dragProps,
       canDraggable,
@@ -761,9 +764,9 @@ export default class Dragzoom extends React.Component<Props, State> {
         <div className="drag-wrap" ref={ rn => this.drag = rn} style={{ height: '100%', width: '100%', position: 'relative' }}>
           {this.renderCanvas()}
           {React.Children.map(this.props.children, this.renderCanvasPolygon)}
-          {polygonDragDisabled? <Draggable {...dragProps}><div style={newStyle} /></Draggable> :null}
+          {polygonDragDisabled? <Draggable {...dragProps} allowAnyClick ={allowAnyClickToDrag}><div style={newStyle} ref={(ele?: Object) => { ele ? this.dragRef = ele : null }} /></Draggable> :null}
           {isPolygonDrag? React.Children.map(this.props.children, this.renderDragCanvasPolygon) : null}
-          <Draggable {...this.state.childDragProps}><div ref={(rn: any) => this.childDrag = rn} style={{...newStyle, display: isPolygonDrag? 'block':'none'}} /></Draggable>
+          <Draggable {...this.state.childDragProps} allowAnyClick ={allowAnyClickToDrag}><div ref={(rn: any) => this.childDrag = rn} style={{...newStyle, display: isPolygonDrag? 'block':'none'}} /></Draggable>
           {React.Children.map(this.props.children, this.renderCommonItem)}
           {showScaleNum ? <span className="scaleNum">{`${showScale}%`}</span> : null}
         </div>

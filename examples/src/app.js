@@ -94,6 +94,7 @@ export default class App extends React.Component{
           polygonDragDisabled={true}
           controlPaint={this.controlPaint}
           dragControlPaint={this.dragControlPaint}
+          allowAnyClickToDrag={true}
         >
           <DragzoomPolygon
             key="2"
@@ -102,6 +103,7 @@ export default class App extends React.Component{
             stopMove={this.stopMove}
             doubleClick={this.doubleClick}
             capture={true}
+            allowAnyClick={false}
           >
             {
             //   polygonList.map((item, index) =>
@@ -118,7 +120,7 @@ export default class App extends React.Component{
           }
           </DragzoomPolygon>
           <DragzoomItems>
-            <DragzoomItem key="top" disabled position={{x: this.state.x, y: this.state.y}} offset={{top:10,left:10}} >
+            <DragzoomItem key="top" position={{x: this.state.x, y: this.state.y}} offset={{top:10,left:10}} >
               <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">
                 <Button onClick={() => this.fixContent({ x: this.state.x, y: this.state.y, width: 232, height: 334, offset:{top:10,left:10} }, 'bottomRight')}>topLeft</Button>
               </Popover>

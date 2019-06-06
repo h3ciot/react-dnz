@@ -35,6 +35,7 @@ $ npm run build-es
 | controlPaint | 控制自定义图层的绘画 | (context:CanvasRenderingContext2D ,props:{id:string,path:Path}) => mixed | - |
 | dragControlPaint | 控制拖拽时自定义图层的绘画 | String | - |
 | getSVGSize | 获取svg格式的背景图的实际大小 | (size: { width: number, height: number }) => mixed | - |
+|allowAnyClickToDrag | 是否允许任意键拖动 | boolean | false |
 | fixContent(实例方法)| 自适应弹出框内容(x,y为左上角定位) | (position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: 'top' &#166; 'left' &#166; 'right' &#166; 'bottom' &#166; 'topLeft' &#166; 'topRight' &#166; 'bottomLeft' &#166; 'bottomRight' &#166; 'leftTop' &#166; 'leftBottom' &#166; 'rightTop' &#166; 'rightBottom') {
 ## DragzoomPolygon
 
@@ -42,8 +43,10 @@ $ npm run build-es
 |-----------|------------------------------------------|------------|---------|
 | capture | 是否捕获坐标 | boolean | false |
 | capturePosition | 捕获坐标函数 | (a:[number,number]) => mixed | (a:[number,number]) => null |
-
-
+| allowAnyClick | 是否响应右键或中键点击事件 | boolean | true
+| capturePosition | 捕获点击事件 | (position: { x: number, y: number }， event) => null | () => null
+| startMove | 鼠标移动开始事件 | (position: { x: number, y: number }， event) => null | () => null
+| stopMove | 鼠标移动结束事件 | (position: { x: number, y: number }， event) => null | () => null
 ## DragzoomPolygon.Polygon
 
 | props     | Description                              | Type       | Default |
@@ -68,4 +71,5 @@ $ npm run build-es
 | children| 子项 | React.Node | null |
 | disabled | 是否禁用拖动 | boolean | false |
 | capture | 是否捕获坐标 | boolean | false |
+| allowAnyClickToDrag | 是否允许任意键拖动 | boolean | false |
 | capturePosition | 捕获坐标函数 | (a:[number,number]) => mixed | (a:[number,number]) => null |

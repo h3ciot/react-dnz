@@ -45,6 +45,7 @@ type Props = {
 
   children: any,
   style: Object,
+  allowAnyClick: boolean,
 }
 
 type State = {
@@ -61,6 +62,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     stopMove: () => null,
     doubleClick: () => null,
     style: {},
+    allowAnyClick: true,
   }
 
   // mouse event
@@ -132,6 +134,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
   }
 
   doubleClick = (e: MouseEvent) => {
+    if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
     const position = this.props.getAllActualPosition([[e.offsetX, e.offsetY]])
     this.clearClick()
     // removeEvent(this.canvas, 'mousemove', this.mouseMove)
@@ -140,6 +143,8 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
   }
 
   mouseDown = (e: MouseEvent) => {
+    console.log(e.button);
+    if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
     this.dragReady(e)
     // this.mdown = checkoutDbClick(() => this.dragReady(e))
   }
@@ -150,6 +155,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
   }
 
   mouseUp = (e: MouseEvent) => {
+    if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
     this.dragDone(e)
     // this.mup = checkoutDbClick(() => this.dragDone(e))
   }
@@ -160,7 +166,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     this.redraw([e.offsetX, e.offsetY])
     if(this.props.capture) {
       const position = this.props.getAllActualPosition([[e.offsetX, e.offsetY]])
-      this.props.capturePosition(position[0])
+      this.props.capturePosition(position[0], e)
       if (!this.preProgress) {
         addEvent(this.canvas, 'mousemove', this.mouseMove)
         this.preProgress = true
@@ -176,7 +182,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     if(!this.coreData) return
     const { start: { x: x1, y: y1 }, current: { x: x2, y: y2 } } = this.coreData
     const position = this.props.getAllActualPosition([[x1, y1], [x2, y2]])
-    this.props.startMove(position)
+    this.props.startMove(position, e)
   }
 
   /** 取消图形变化 */
@@ -186,7 +192,7 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     this.coreData = void 0
     // removeEvent(this.canvas, 'mousemove', this.mouseMove)
     const position = this.props.getAllActualPosition([[e.offsetX, e.offsetY]])
-    this.props.stopMove(position[0])
+    this.props.stopMove(position[0], e)
   }
 
   redraw = (position: [number, number] | void) => {

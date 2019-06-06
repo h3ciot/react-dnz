@@ -24,10 +24,12 @@ const DragzoomItem = (props: Props) => {
     pointsDisabled,
     disabled,
     dragItemStyle,
+    allowAnyClickToDrag,
   } = props
   const isEdit = !pointsDisabled && !disabled
   return (
     <Draggable
+        allowAnyClick = {allowAnyClickToDrag}
       position={{ x, y }}
       onStop={(e, position: Position) => props.onDragStop(id)}
       onDrag={isEdit ? (e, position: Position) => props.onDrag(id, position) : () => false}
