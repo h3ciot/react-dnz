@@ -143,7 +143,6 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
   }
 
   mouseDown = (e: MouseEvent) => {
-    console.log(e.button);
     if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
     this.dragReady(e)
     // this.mdown = checkoutDbClick(() => this.dragReady(e))
