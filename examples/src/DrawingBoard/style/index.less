@@ -1,0 +1,212 @@
+.drawing-board5200 {
+  position: relative;
+  height: 100%;
+  background-color: #F6F6F6;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  >.ant-spin-nested-loading {
+    height: 100%;
+    >.ant-spin-container {
+      height: 100%;
+    }
+  }
+  .dragzoom-icon {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+  }
+  .current-point {
+    position: absolute;
+    bottom: 10px;
+    left: 18px;
+    height: 34px;
+    line-height: 34px;
+    min-width: 150px;
+    background-color: #1ABC9C;
+    color: #FFF;
+    padding: 0 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+    z-index: 5;
+  }
+  .drawing-tools {
+    position: absolute;
+    top: 10px;
+    left: 18px;
+    height: 36px;
+    background-color: #FFF;
+    border-radius: 4px;
+    border: 1px solid #CCCCCC;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+    z-index: 5;
+    .ant-radio-button-wrapper {
+      border: 0;
+      height: 34px;
+      line-height: 32px;
+      padding: 0 13px;
+      font-size: 12px;
+      color: #666666;
+      .line-icon {
+        display: inline-block;
+        vertical-align: super;
+        margin-right: 8px;
+        width: 20px;
+        height: 2px;
+        background-color: #5BB095;
+      }
+      .circle-icon {
+        display: inline-block;
+        vertical-align: sub;
+        margin-right: 8px;
+        width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        background-color: #89E5CC;
+        border: 1px solid ;
+      }
+      .tool-img {
+        vertical-align: text-top;
+        margin-right: 5px;
+      }
+    }
+    .ant-radio-button-wrapper:before {
+      width: 0;
+    }
+    .ant-radio-button-wrapper:after {
+      content: '';
+      position: absolute;
+      left: auto;
+      top: auto;
+      bottom: 9px;
+      right: 0;
+      height: 16px;
+      width: 1px;
+      background-color: #CCCCCC;
+    }
+    .ant-radio-button-wrapper:last-child:after {
+      width: 0px;
+    }
+    .ant-radio-button-wrapper-checked {
+      background-color: #E0FAF5;
+      box-shadow: 0px -2px 0px 1px #00A684 !important;
+      border-radius: 0px;
+    }
+    .ant-radio-button-wrapper-checked:after {
+      width: 0px;
+    }
+    .draw-button {
+      position: relative;
+      width: 80px;
+      left: 1px;
+      float: right;
+      cursor: pointer;
+      font-size: 12px;
+      padding-right: 12px;
+      color: #666666;
+      line-height: 34px;
+      text-align: right;
+      .color-icon {
+        display: inline-block;
+        margin-right: 4px;
+        width: 20px;
+        height: 10px;
+        border-radius: 2px;
+        background-color: #FF6900;
+      }
+      .line-icon {
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+        width: 20px;
+        height: 2px;
+        background-color: #5BB095;
+      }
+      .circle-icon {
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+        width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        background-color: #89E5CC;
+        border: 1px solid #1ABC9C;
+      }
+      &.three {
+        padding-right: 8px;
+      }
+      .tool-img {
+        vertical-align: text-top;
+        margin-right: 5px;
+      }
+    }
+    .draw-button:after {
+      content: '';
+      position: absolute;
+      left: auto;
+      top: auto;
+      bottom: 9px;
+      right: 0;
+      height: 16px;
+      width: 1px;
+      background-color: #CCCCCC;
+    }
+    .draw-icon {
+      margin-right: 5px;
+      font-size: 18px;
+      color: #1AB394;
+    }
+  }
+
+  .origin {
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    position: absolute;
+    left: -5px;
+    top: -5px;
+  }
+  .origin:after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid red;
+    position: absolute;
+    left: -5px;
+    top: -5px;
+  }
+  .origin-axis {
+    pointer-events: none;
+    position: absolute;
+    background-color: red;
+  }
+  .axis-x:after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    right: 0px;
+    top: -3px;
+    border-top: 1px solid red;
+    border-right: 1px solid red;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+  }
+  .axis-y:after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    left: -3.5px;
+    bottom: 2px;
+    border-top: 1px solid red;
+    border-right: 1px solid red;
+    -webkit-transform: rotate(135deg);
+    transform: rotate(135deg);
+  }
+}
