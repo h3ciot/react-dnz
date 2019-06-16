@@ -1,0 +1,21 @@
+<svg width="580" height="400" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+ <defs>
+  <filter id="svg_1_blur">
+   <feGaussianBlur stdDeviation="0.7" in="SourceGraphic"/>
+  </filter>
+ </defs>
+ <g>
+  <title>background</title>
+  <rect fill="#4f20db" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <text font-style="italic" filter="url(#svg_1_blur)" stroke="#B8874D" xml:space="preserve" text-anchor="start" font-family="'Palatino Linotype', 'Book Antiqua', Palatino, serif" font-size="39" id="svg_1" y="162.5" x="126.800752" stroke-width="0" fill="#A8FFE9">这是一张svg图片</text>
+  <line stroke="#B8874D" stroke-linecap="null" stroke-linejoin="null" id="svg_2" y2="93.5" x2="535.499985" y1="91.5" x1="41.5" stroke-opacity="null" fill="none"/>
+  <line stroke="#B8874D" stroke-linecap="null" stroke-linejoin="null" id="svg_3" y2="317.5" x2="539.499999" y1="319.5" x1="37.5" stroke-opacity="null" fill="none"/>
+  <ellipse ry="28" rx="64.5" id="svg_4" cy="256.5" cx="275" fill-opacity="null" stroke-opacity="null" stroke-width="null" stroke="#B8874D" fill="#619E73"/>
+  <ellipse ry="1" id="svg_5" cy="239.5" cx="295.5" stroke-opacity="null" stroke-width="null" stroke="#B8874D" fill="#CBFFFF"/>
+  <path d="m213.5,55.5c3,1 197,-1 196,-1l-68,-2l-29,-15" id="svg_6" stroke-opacity="null" stroke-width="null" stroke="#B8874D" fill="none"/>
+ </g>
+</svg>

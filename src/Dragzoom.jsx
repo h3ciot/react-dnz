@@ -399,17 +399,22 @@ export default class Dragzoom extends React.Component<Props, State> {
     const ext = img.substr(index + 1);
     const index2 = img.lastIndexOf('/');
     const ext2 = img.substr(index2 + 1, 3);
+    const svgFlag = ext2 === 'svg' || ext2 === 'SVG' || img.indexOf('data:image/svg+xml;') === 0;
     const { target } = e;
     if (target instanceof HTMLImageElement) {
       const { naturalWidth, naturalHeight } = target
       let actualSize = { width: naturalWidth, height: naturalHeight }
-      if (ext2 === 'svg' || ext2 === 'SVG') {
+      if (svgFlag) {
         const result = window.atob(img.substr(img.indexOf(',') + 1))
         const parser = new DOMParser();
         const doc = parser.parseFromString(result, "image/svg+xml");
         if (doc.rootElement) {
           const viewBox = doc.rootElement.getAttribute('viewBox');
-          if (viewBox) {
+          const width = doc.rootElement.getAttribute('width');
+          const height = doc.rootElement.getAttribute('height');
+          if (width && height) {
+            actualSize = { width: parseInt(width), height: parseInt(height) };
+          } else if (viewBox) {
             const sizeArr = viewBox.split(' ');
             const sizeArr2 = viewBox.split(',');
             if (sizeArr2.length === 4) {
