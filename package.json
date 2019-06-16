@@ -1,6 +1,6 @@
 {
   "name": "react-dnz",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "React drag and zoom component",
   "main": "index.js",
   "scripts": {
