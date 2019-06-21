@@ -5,7 +5,6 @@
  * */
 import { Shape, Vector2 } from 'three';
 
-
 // 获取webgl坐标[-1,1]
 // TODO 待优化，可以缓存
 export function transformCoordinateSys(evt: {clientX: number, clientY: number}, offsetParent: HTMLElement, event = true): { x: number, y: number } {
@@ -51,12 +50,37 @@ export function generatePath(drawShape: string, drawPath: Array, radius: number)
   }
   return path;
 }
-
-export function cloneMaterial(source, para) {
-    const result = source.clone();
-    for (const key in para) {
-        source[key] = para[key];
-    }
-    console.log(result);
-    return result;
+type Mask = {
+    key: string, //
+    position: { x: number, y: number }, // 定位
+    z: number, // z位置
+    img: string, // 图片路径
+    content: string, // 文字内容
+    width: number,
+    height: number,
+    position: 'left' | 'top' | 'bottom' | 'right',
+};
+export function generateTextMark(mark: Mask, cb: canvas => null) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+// TODO 后期需要根据文字宽度进行分行显示
+    ctx.fillStyle = '#2e8eff';
+    ctx.font = "900 20px serif";
+    const { img, content, width, height } = mark;
+    canvas.width = width;
+    canvas.height = height;
+    ctx.clearRect(0,0,width,height);
+    const imgObj = new Image();
+    imgObj.src = img;
+    imgObj.onload = ( e => {
+        const text = ctx.measureText(content);
+        ctx.drawImage(imgObj, 0, 0, width, height - 20);
+        ctx.fillText(content, width / 2, height - 10, width);
+        cb(canvas, mark);
+    });
+    imgObj.onerror = (err => {
+        console.log(err);
+    });
 }

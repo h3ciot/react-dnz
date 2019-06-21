@@ -115,7 +115,7 @@ export default class CustomItems extends Component<Props, State> {
         const newLeft = containerSize.width / 2 - sceneSize.width / 2 * zoom - offset.x;
         const { position: oldPosition, bounds: { left = 0, top = 0 } } = this.state;
         const newPosition = {};
-        const scale = nextPros.zoom / this.props.zoom;
+        const scale = zoom / this.props.zoom;
         Object.keys(oldPosition).forEach(key => {
             const position = oldPosition[key];
             let { x: lastX, y: lastY, offset } = position;
@@ -164,6 +164,7 @@ export default class CustomItems extends Component<Props, State> {
 
     render() {
         console.log('props:', this.props);
+        console.log('states:', this.state);
         return <div className="customItemsContainers" style={{ position: 'absolute', left: 0, top: 0 }}>
             {React.Children.map(this.props.children, this.renderItem)}
         </div>;

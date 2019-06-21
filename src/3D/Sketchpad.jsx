@@ -6,7 +6,7 @@
 import React, { Component } from 'react';
 import WebGL from './WebGL';
 import BaseConfig from './BaseConfig';
-import { generatePath, transformCoordinateSys } from "./utilsFor3d";
+import { generatePath, transformCoordinateSys, generateTextMark } from "./utilsFor3d";
 import {
     WebGLRenderer,
     PerspectiveCamera,
@@ -61,7 +61,6 @@ import {
 } from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { MapControls } from "three/examples/jsm/controls/MapControls";
 
 type Area = {
     key: string, // 用于优化渲染机制
@@ -71,6 +70,16 @@ type Area = {
     color: string,
     radius?: number,
     z: number,
+};
+type Mask = {
+    key: string, //
+    position: { x: number, y: number }, // 定位
+    z: number, // z位置
+    img: string, // 图片路径
+    content: string, // 文字内容
+    width: number,
+    height: number,
+    placeMoment: 'left' | 'top' | 'bottom' | 'right',
 };
 type Props = {
     baseImg?: string, // 底图url
@@ -82,6 +91,7 @@ type Props = {
     drawModel: 'line' | 'rect' | 'circle' | 'polygon' | 'mark' | null, // 绘制模式
     customConfig?: Object, // 配置文件
     areaList?:Array<Area>, // 区域数据
+    maskList?: Array<Mask>, // 标记数据
     selectObject?: (selectObj: Object, e: event) => null, // 选择元素回调
     loadingStatus?: (err: Error, loading: boolean, percentage: number) => null, // 加载状态回调
 };
@@ -107,6 +117,7 @@ export default class Sketchpad extends Component<Props, State> {
         allowAnyClick: true,
         customConfig: {},
         areaList: [],
+        maskList: [],
     };
     containerRef: Object; // 容器引用
     canvasRef: Object; // canvas引用
@@ -120,6 +131,7 @@ export default class Sketchpad extends Component<Props, State> {
     selectObject: Object; // 选中对象
     areaGroup: Group; // 区域对象群组
     areaGroupMap: Map; // 区域对象映射，保存的是key -> uuid
+    markGroup: Group; // 标记对象数组
     lineBasicMaterial: Material; // 基础线材质
     meshMaterial: Material; // 基础棱柱材质
     meshMaterialCache: Map; // 材质缓存
@@ -277,6 +289,8 @@ export default class Sketchpad extends Component<Props, State> {
         // 初始化群组对象
         this.areaGroup = new Group();
         this.areaGroupMap = new Map();
+        this.markGroup = new Group();
+        this.scene.add(this.markGroup);
         this.scene.add(this.areaGroup);
         // 初始化gtlf
         this.loader = new GLTFLoader();
@@ -289,7 +303,7 @@ export default class Sketchpad extends Component<Props, State> {
 
     // 加载gtlf文件
     loadGtlf = (props: Props) => {
-        const { dataUrl, loadingStatus } = props;
+        const { dataUrl, loadingStatus, areaList, maskList } = props;
         this.lastPosition = {};
         if (dataUrl) {
             this.loader.load(dataUrl, gltf => {
@@ -297,7 +311,8 @@ export default class Sketchpad extends Component<Props, State> {
                 loadingStatus(null, false, 100);
                 // TODO 加载流程待继续优化
                 // this.scene.add(gltf.scene);
-                this.drawAreas(props.areaList);
+                this.drawAreas(areaList);
+                this.renderMarks(maskList);
             }, xhr => {
                 console.log( xhr.loaded / xhr.total * 100 + '% loaded' );
                 const percentage = ( xhr.loaded / xhr.total * 100 ) || 0;
@@ -333,7 +348,12 @@ export default class Sketchpad extends Component<Props, State> {
     // 绘制区域
     drawAreas = areas => {
         this.areaGroupMap.clear();
+        // 内存释放
+        this.areaGroup.children.forEach( item => {
+            item.geometry.dispose();
+        });
         this.areaGroup.remove(this.areaGroup.children);
+
         for (const area of areas) {
             const object = this.drawGraph(area);
             // 产生阴影
@@ -401,6 +421,38 @@ export default class Sketchpad extends Component<Props, State> {
         });
     };
 
+    // 绘制poi
+    renderMarks = (marks: Array<Mark>) => {
+        // 内存释放
+        this.markGroup.children.forEach( item => {
+            item.geometry.dispose();
+        });
+        this.markGroup.remove(this.markGroup.children);
+
+        for (const mark of marks) {
+            generateTextMark(mark, this.renderMark);
+        }
+    };
+
+    // TODO 异步操作可能会发生下一次刷新的问题，需要进一步优化
+    // 异步渲染poi
+    renderMark  = (canvas, mask) => {
+        const { position, z, width, height } = mask;
+        if(this.props.maskList.indexOf(mask) === -1) {
+            return false;
+        }
+        const texture = new Texture(canvas);
+        texture.needsUpdate = true;
+        const mark = new Sprite(new SpriteMaterial({ map: texture, color: 0xffffff, transparent:true, depthTest: false }));
+        const { x, y } = transformCoordinateSys({ clientX: position.x, clientY: position.y }, this.canvasRef.current);
+        console.log(x, y);
+        const vector = new Vector3(x, y, 0);
+        vector.unproject(this.camera);
+        vector.setZ(0);
+        mark.position.set(vector.x, vector.y, this.zBase + z);
+        mark.scale.set(width,height,1);
+        this.markGroup.add(mark);
+    };
     render() {
         const { style = {}, containerClass = '', children } = this.props;
         const containerStyle = {  width: '100%', height: '100%', ...style, perspective: Sketchpad.perspective, position: 'absolute'};
@@ -408,7 +460,7 @@ export default class Sketchpad extends Component<Props, State> {
             <canvas ref={this.canvasRef} className="canvasContent" style={{ width: '100%', height: '100%' }}>
                 Please use browser support canvas!
             </canvas>
-            {this.renderChildren(children)}
+            {/*{this.renderChildren(children)}*/}
         </div>;
     }
 }
