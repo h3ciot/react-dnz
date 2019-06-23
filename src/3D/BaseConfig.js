@@ -14,7 +14,7 @@ const BaseConfig = {
     steps: 1,
     depth: 100,
     curveSegments: 100,
-    bevelEnabled: true,
+    bevelEnabled: false,
   }, // 拉伸参数
   meshMaterialPara: {
     color: 0x696969,

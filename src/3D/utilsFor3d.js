@@ -4,20 +4,28 @@
  *
  * */
 import { Shape, Vector2 } from 'three';
-
+import type { Size, Position } from "./TypeDec";
 // 获取webgl坐标[-1,1]
 // TODO 待优化，可以缓存
-export function transformCoordinateSys(evt: {clientX: number, clientY: number}, offsetParent: HTMLElement, event = true): { x: number, y: number } {
-    const offsetParentRect = offsetParent.getBoundingClientRect();
-    const width = offsetParentRect.width || offsetParentRect.right - offsetParentRect.left;
-    const height = offsetParentRect.height || offsetParentRect.bottom - offsetParentRect.top;
-    const positionX = event ? evt.clientX + offsetParent.scrollLeft - offsetParentRect.left : evt.clientX;
-    const positionY = event ? evt.clientY + offsetParent.scrollTop - offsetParentRect.top : evt.clientY;
+export function transformCoordinateToWebgl(evt: {clientX: number, clientY: number}, offsetParent: Size): Position {
+    const  { width, height, scrollLeft = 0, scrollTop = 0, left, top } = offsetParent;
+    const positionX = evt.clientX + scrollLeft - left;
+    const positionY = evt.clientY + scrollTop - top;
     const x = (positionX / width * 2 - 1);
     const y = (-positionY / height * 2 + 1);
-    return { x, y, positionX, positionY }
+    return { x, y }
 }
 
+export function transformCoordinateSys(container: Size, scene: Size, positions: Array<Position>): Array<Position> {
+    const { width: cWidth = 0, height: cHeight = 0 } = container;
+    const { width: sWidth = 0, height: sHeight = 0 } = scene;
+    return positions.map(position => {
+        const { x = 0, y= 0 } = position;
+        const clientX = (cWidth - sWidth) / 2 + x;
+        const clientY = (cHeight - sHeight) / 2 + y;
+        return { clientX, clientY };
+    }).map(item => transformCoordinateToWebgl(item, container));
+}
 
 export function generatePath(drawShape: string, drawPath: Array, radius: number) {
   const path = new Shape();
