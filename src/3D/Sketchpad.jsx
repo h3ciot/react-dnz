@@ -173,6 +173,10 @@ export default class Sketchpad extends Component<Props, State> {
     // TODO 变更之后重新进行渲染,缓存优化
     componentWillReceiveProps(nextProps) {
         const { model } = nextProps;
+        const { model: oldModel } = this.props;
+        if( model !== oldModel) {
+            this.resetModel(model);
+        }
     }
 
     // TODO 资源释放需要释放全部，避免内存溢出
@@ -182,6 +186,31 @@ export default class Sketchpad extends Component<Props, State> {
         this.eventSub.unsubscribe();
         this.control.dispose();
     }
+
+    // 切换2D和3D模式
+    resetModel = model => {
+        if(model === '2D') {
+            if(this.control) {
+                this.control.enableRotate = false;
+                this.control.maxPolarAngle = this.control.minPolarAngle = Math.PI / 2;
+                this.control.maxAzimuthAngle = this.control.minAzimuthAngle = 0;
+            }
+            if (this.dragControl) {
+                this.dragControl.enabled = true;
+            }
+        } else {
+            if(this.control) {
+                this.control.enableRotate = true;
+                this.control.maxPolarAngle =Math.PI;
+                this.control.minPolarAngle = 0;
+                this.control.maxAzimuthAngle = Infinity;
+                this.control.minAzimuthAngle = -Infinity;
+            }
+            if (this.dragControl) {
+                this.dragControl.enabled = false;
+            }
+        }
+    };
 
     initWebGLContext = (canvas, version) => {
         const { clientHeight, clientWidth, scrollLeft, scrollTop } = canvas;
