@@ -6,64 +6,42 @@
 import React, { Component } from 'react';
 import WebGL from './WebGL';
 import BaseConfig from './BaseConfig';
-import { generatePath, transformCoordinateSys, generateTextMark, transformCoordinateToWebgl } from "./utilsFor3d";
+import { DragControls } from './DragControls';
+import {
+    generatePath,
+    transformCoordinateSys,
+    generateTextMark,
+    transformCoordinateToWebgl,
+    transformWebgl
+} from "./utilsFor3d";
 import type { Size, Position } from "./TypeDec";
 import {
     WebGLRenderer,
-    PerspectiveCamera,
     Vector3,
     Scene,
     Color,
     AxesHelper,
-    GridHelper,
-    BoxGeometry,
     MeshBasicMaterial,
     Mesh,
-    Line3,
     DoubleSide,
-    ImageBitmapLoader,
-    CanvasTexture,
     PlaneGeometry,
-    Line,
-    Shape,
     OrthographicCamera,
     LineBasicMaterial,
-    Geometry,
-    BufferGeometry,
-    Path,
-    ShapeBufferGeometry,
     ExtrudeBufferGeometry,
-    ShapePath,
-    Vector2,
-    Math as _Math,
-    CameraHelper,
-    ExtrudeGeometry,
-    Points,
-    PointsMaterial,
     Group,
     Raycaster,
-    TextureLoader,
     SpriteMaterial,
     Sprite,
-    TextGeometry,
-    Font,
-    TextBufferGeometry,
     Texture,
     DirectionalLight,
-    FrontSide,
-    MeshLambertMaterial,
-    DirectionalLightHelper,
-    MeshDepthMaterial,
-    MeshPhysicalMaterial,
     Material,
     MeshPhongMaterial,
-    PlaneBufferGeometry,
-    Object3D, Camera, Light, PCFSoftShadowMap,
+    Object3D, Camera, Light
 } from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import {fromEvent, Subscription, partition} from "rxjs";
-import { map, filter, distinct } from 'rxjs/operators';
+import { fromEvent, Subscription, partition } from "rxjs";
+import { map, filter } from 'rxjs/operators';
 type Area = {
     key: string, // 用于优化渲染机制
     type: 'line' | 'rect' | 'circle' | 'polygon',
@@ -72,6 +50,7 @@ type Area = {
     color: string,
     radius?: number,
     z: number,
+    onClick?: (e: { type: string, event: Event }) => null,
 };
 type Mask = {
     key: string, //
@@ -81,7 +60,11 @@ type Mask = {
     content: string, // 文字内容
     width: number,
     height: number,
-    placeMoment: 'left' | 'top' | 'bottom' | 'right',
+    placement: 'top' | 'bottom',
+    onClick?: (e: { type: string, event: Event }) => null,
+    dragable: boolean,
+    onDrag?: (e: { type: string, position: Position }) => null,
+    onDragStop?: (e: { type: string, position: Position }) => null,
 };
 type Props = {
     baseImg?: string, // 底图url
@@ -91,25 +74,25 @@ type Props = {
     children: any, // children
     allowAnyClick: boolean, // 捕获点击事件的click类型，通过event.button区分
     captureClick: boolean, // 是否捕获事件
-    capturePosition: (position: Position, e: event) => null, // 捕获事件回调函数
+    captureClickPosition: (position: Position, e: Event) => null, // 捕获事件回调函数
     drawModel: 'line' | 'rect' | 'circle' | 'polygon' | 'mark' | null, // 绘制模式
     customConfig?: Object, // 配置文件
     areaList?:Array<Area>, // 区域数据
     maskList?: Array<Mask>, // 标记数据
     selectObject?: (selectObj: Object, e: event) => null, // 选择元素回调
     loadingStatus?: (err: Error, loading: boolean, percentage: number) => null, // 加载状态回调
+    model: '2d' | '3d', // 展示模式，2D模式下可进行编辑操作，3d模式下目前只能进行展示操作
 };
 type State = {
-    width: number, // 场景宽度
-    height: number, // 场景高度
+    // 场景宽高
+    sceneSize: {
+        width: number,
+        height: number,
+    },
     offset: {
         x: number, // 中心点位置
         y: number, // 中心点位置
         zoom: number, // 缩放
-    },
-    containerSize: {
-        width: number,
-        height: number,
     },
 };
 
@@ -122,6 +105,8 @@ export default class Sketchpad extends Component<Props, State> {
         customConfig: {},
         areaList: [],
         maskList: [],
+        captureClickPosition: f => f,
+        model: '3d',
     };
     containerRef: Object; // 容器引用
     canvasRef: Object; // canvas引用
@@ -131,6 +116,7 @@ export default class Sketchpad extends Component<Props, State> {
     camera: Camera; // 相机实例
     rayCaster: Raycaster; // 光线处理
     control: OrbitControls; // 视图控制器
+    dragControl: DragControls; // 拖拽控制器
     light: Light; // 灯光
     selectObject: Object; // 选中对象
     areaGroup: Group; // 区域对象群组
@@ -152,16 +138,14 @@ export default class Sketchpad extends Component<Props, State> {
     constructor(props) {
         super(props);
         this.state = {
-            width: 1000,
-            height: 800,
+            sceneSize: {
+                width: 0,
+                height: 0,
+            },
             offset: {
                 x: 0,
                 y: 0,
                 zoom: 1,
-            },
-            containerSize: {
-                width: 0,
-                height: 0,
             },
         };
         this.containerRef = React.createRef();
@@ -188,20 +172,21 @@ export default class Sketchpad extends Component<Props, State> {
 
     // TODO 变更之后重新进行渲染,缓存优化
     componentWillReceiveProps(nextProps) {
-
+        const { model } = nextProps;
     }
 
+    // TODO 资源释放需要释放全部，避免内存溢出
     componentWillUnmount() {
         cancelAnimationFrame(this.animateId);
         window.removeEventListener('resize', this.onResize);
         this.eventSub.unsubscribe();
+        this.control.dispose();
     }
 
     initWebGLContext = (canvas, version) => {
         const { clientHeight, clientWidth, scrollLeft, scrollTop } = canvas;
         const { left, top } = canvas.getBoundingClientRect();
         this.positionInfo = { width: clientWidth, height: clientHeight, scrollLeft, scrollTop, left, top };
-        this.setState({ containerSize: { width: clientWidth, height: clientHeight }});
         // 初始化渲染器
         if (version === 2) {
             this.renderer = new WebGLRenderer({ canvas, antialias: true, context: canvas.getContext('webgl2') });
@@ -228,6 +213,9 @@ export default class Sketchpad extends Component<Props, State> {
         this.camera.position.set( 0, 0, Sketchpad.perspective );
         this.camera.lookAt( new Vector3() );
 
+        // 调整缩放倍率
+        // this.camera.zoom = 0.5;
+        // this.camera.updateProjectionMatrix();
         // 灯光初始化，默认使用平行光
         this.light = new DirectionalLight(this.config.lightColor, 1);
         // TODO 阴影设置
@@ -252,14 +240,6 @@ export default class Sketchpad extends Component<Props, State> {
         // 射线初始化，用于选中物体
         this.rayCaster = new Raycaster();
 
-        // 添加底部平面
-        var geometry = new PlaneGeometry( 1000, 800 );
-        var material = new MeshBasicMaterial( {color: 0xffff00, side: DoubleSide} );
-        var plane = new Mesh( geometry, material );
-        // plane.receiveShadow = true;
-        this.scene.add( plane );
-
-
         //    z基准高度
         this.zBase = 0;
 
@@ -276,9 +256,9 @@ export default class Sketchpad extends Component<Props, State> {
 
         this.scene.add(new AxesHelper(Math.max(clientHeight, clientWidth)));
         // 增加网格辅助线
-        const gridHelper = new GridHelper( Math.max(clientHeight, clientWidth), 100, 0x444444, 0x888888 );
-        gridHelper.rotateX(Math.PI / 2);
-        this.scene.add(gridHelper);
+        // const gridHelper = new GridHelper( Math.max(clientHeight, clientWidth), 100, 0x444444, 0x888888 );
+        // gridHelper.rotateX(Math.PI / 2);
+        // this.scene.add(gridHelper);
         // 平移旋转平面
         // this.scene.rotateX(-Math.PI / 2);
         // this.scene.rotateX(Math.PI / 2);
@@ -311,37 +291,70 @@ export default class Sketchpad extends Component<Props, State> {
          //  增加窗口大小调整
         window.addEventListener('resize', this.onResize);
         console.log('aaa');
-        const clickEvent = partition(fromEvent(canvas, 'click').pipe(
+        // 事件分流，根据是否捕获分流至两个处理函数
+        const [captureEvent, clickEvent] = partition(fromEvent(canvas, 'click').pipe(
+            filter(() => this.control.enabled),         // 拖拽期间暂时关闭
             map(event => {
                 const { x, y } = transformCoordinateToWebgl(event, this.positionInfo);
                 const vector = new Vector3(x, y, 0);
-                vector.unproject(this.camera);
-                vector.setZ(0);
                 return { position: vector, event };
             }),
-            filter(e =>
-                e.position.x >= -this.state.width / 2 &&
-                e.position.x <= this.state.width / 2 &&
-                e.position.y >= -this.state.height / 2 &&
-                e.position.y <= this.state.height)
-        ), () => this.props.captureClick);
-        this.eventSub.add(.subscribe(x =>                 console.log('vector:', x)));
+        ), e => this.props.captureClick && this.props.allowAnyClick && typeof e.event.button === 'number' && e.event.button === 0);
+        this.eventSub.add(captureEvent.pipe(
+            map(event => {
+                const { position } = event;
+                position.unproject(this.camera);
+                position.setZ(0);
+                return event;
+            }),
+            filter(e => {
+                const { sceneSize: { width, height }} = this.state;
+                return e.position.x >= -width / 2 &&
+                    e.position.x <= width / 2 &&
+                    e.position.y >= -height / 2 &&
+                    e.position.y <= height
+            })
+        ).subscribe(this.capturePosition));
+        this.eventSub.add(clickEvent.subscribe(this.handleClick));
+    };
+
+    // 将坐标转换后通过props传出
+    capturePosition = ( e: { position: Position, event: Event }) => {
+        const { x, y } = transformWebgl(e.position, this.state.sceneSize);
+        console.log('position:', x, ':', y);
+        this.props.captureClickPosition({ x, y }, e.event);
+    };
+
+    // 处理点击与选中事件
+    handleClick = (e: { position: Position, event: Event }) => {
+        const { position, event } = e;
+        position.z = 0.5;
+        this.rayCaster.setFromCamera(position, this.camera);
+        const intersects = this.rayCaster.intersectObjects([].concat(this.markGroup.children).concat(this.areaGroup.children));
+        if (intersects.length) {
+            const [select] = intersects;
+            select.object.dispatchEvent({ type: 'click', event });
+        }
     };
 
     // 加载gtlf文件
     loadGtlf = (props: Props) => {
         const { dataUrl, loadingStatus, areaList, maskList } = props;
-        this.lastPosition = {};
-        this.drawAreas(areaList);
-        this.renderMarks(maskList);
         if (dataUrl) {
             this.loader.load(dataUrl, gltf => {
                 console.log(gltf);
+                const { sceneSize } = gltf.asset;
+                const { width, height } = sceneSize;
+                const { width: cWidth, height: cHeight } = this.positionInfo;
+                const zoom = Math.min(cWidth / width, cHeight / height).toFixed(2);
+                this.setZoom(zoom);
+                this.setState({ sceneSize });
                 loadingStatus(null, false, 100);
                 // TODO 加载流程待继续优化
-                // this.scene.add(gltf.scene);
+                this.scene.add(gltf.scene);
                 this.drawAreas(areaList);
                 this.renderMarks(maskList);
+                this.addBasePlane(sceneSize);
             }, xhr => {
                 console.log( xhr.loaded / xhr.total * 100 + '% loaded' );
                 const percentage = ( xhr.loaded / xhr.total * 100 ) || 0;
@@ -350,6 +363,21 @@ export default class Sketchpad extends Component<Props, State> {
                 loadingStatus(err, false);
             })
         }
+    };
+
+    // 添加基准平面
+    addBasePlane = (size: { width: number, height: number }) => {
+        const geometry = new PlaneGeometry( size.width, size.height );
+        const material = new MeshBasicMaterial( {color: 0xffffff, side: DoubleSide } );
+        const plane = new Mesh( geometry, material );
+        // plane.receiveShadow = true;
+        this.scene.add( plane );
+    };
+
+    // 调整缩放倍率
+    setZoom = (zoom: number) => {
+        this.camera.zoom = zoom;
+        this.camera.updateProjectionMatrix();
     };
 
     //  重设场景宽高
@@ -385,19 +413,27 @@ export default class Sketchpad extends Component<Props, State> {
         this.areaGroupMap.clear();
         // 内存释放
         this.areaGroup.children.forEach( item => {
+            const { onClick } = item.userData;
+            item.removeEventListener('click', onClick);
+            item.userData = null;
             item.geometry.dispose();
         });
         this.areaGroup.remove(this.areaGroup.children);
 
         for (const area of areas) {
+            const { onClick } = area;
             const object = this.drawGraph(area);
             // 产生阴影
             object.castShadow = true;
             object.receiveShadow = true;
+            object.userData = { ...area };
             // TODO 缓存机制，待确认使用
             // const uuid = _Math.generateUUID();
             // object.material = item.material;
             // object.userData.uuid = uuid;
+            if(onClick) {
+                object.addEventListener('click', onClick);
+            }
             this.areaGroup.add(object);
             // this.areaGroupMap.set(uuid, object.uuid);
         }
@@ -405,10 +441,11 @@ export default class Sketchpad extends Component<Props, State> {
 
     // 绘制单个图形
     drawGraph = (area: Area) => {
-        const { width: sWidth, height: sHeight } = this.state;
+        const { width: sWidth, height: sHeight } = this.state.sceneSize;
         const { type, points, height, color, radius, z = this.zBase } = area;
         const path = generatePath(type,
-            transformCoordinateSys(this.positionInfo, { width: sWidth, height: sHeight }, points.map(point => ({ x: point[0], y: point[1] }))).map(item => {
+            transformCoordinateSys(this.positionInfo, { width: sWidth, height: sHeight }, points.map(point => ({ x: point[0], y: point[1] })),
+                this.camera.zoom).map(item => {
                 const { x, y } = item;
                 const vector = new Vector3(x, y, 0);
                 vector.unproject(this.camera);
@@ -460,36 +497,85 @@ export default class Sketchpad extends Component<Props, State> {
     renderMarks = (marks: Array<Mark>) => {
         // 内存释放
         this.markGroup.children.forEach( item => {
-            item.geometry.dispose();
+            const { onClick, onDrag, onDragStop } = item.userData;
+            item.removeEventListener('click', onClick);
+            item.removeEventListener('drag', onDrag);
+            item.removeEventListener('dragstop', onDragStop);
+            item.userData = null;
+            // 资源释放
+            // TODO 重用部分材质
+            item.geometry && item.geometry.dispose();
+            item.material.map && item.material.map.dispose();
+            item.material && item.material.dispose();
         });
+        if(this.dragControl) {
+            this.dragControl.dispose();
+            this.dragControl.removeEventListener( 'dragstart', this.handleDragEvent);
+            this.dragControl.removeEventListener('drag', this.handleDragEvent);
+            this.dragControl.removeEventListener( 'dragend', this.handleDragEvent);
+            this.dragControl = null;
+        }
         this.markGroup.remove(this.markGroup.children);
 
+        let dragCount = 0;
         for (const mark of marks) {
             generateTextMark(mark, this.renderMark);
+            dragCount += mark.dragable ? 1 : 0;
         }
+        if(this.markGroup.children.length || dragCount) {
+            const { sceneSize } = this.state;
+            const { width, height } = sceneSize;
+            this.dragControl = new DragControls(this.markGroup.children, this.camera, this.canvasRef.current, { left: -width/2, right: width/2, top: -height / 2, bottom: height / 2});
+            // TODO 优化，重复刷新会导致内存泄漏
+            this.dragControl.addEventListener( 'dragstart', this.handleDragEvent);
+            this.dragControl.addEventListener('drag', this.handleDragEvent);
+            this.dragControl.addEventListener( 'dragend', this.handleDragEvent);
+        }
+    };
+
+    // 统一回调drag事件
+    handleDragEvent = (e: { type: string, object: Object3D } ) => {
+        const { type, object } = e;
+        if (type !== 'dragend') {
+            this.control.enabled = false;
+        } else {
+            // 延迟至下一轮事件循环放开视图控制器，避免传出点击事件
+            setTimeout(() => this.control.enabled = true, 0);
+        }
+        const { x, y } = transformWebgl(object.position, this.state.sceneSize);
+        object.dispatchEvent( { type, position: { x, y } });
     };
 
     // TODO 异步操作可能会发生下一次刷新的问题，需要进一步优化
     // 异步渲染poi
     renderMark  = (canvas, mask) => {
-        const { width: sWidth, height: sHeight } = this.state;
-        const { position, z, width, height } = mask;
+        const { width: sWidth, height: sHeight } = this.state.sceneSize;
+        const { position, z, width, height, onClick, dragable, onDrag, onDragStop } = mask;
         if(this.props.maskList.indexOf(mask) === -1) {
             return false;
         }
         const texture = new Texture(canvas);
         texture.needsUpdate = true;
-        const mark = new Sprite(new SpriteMaterial({ map: texture, color: 0xffffff, transparent:true, depthTest: false }));
-        const { x, y } = transformCoordinateSys(this.positionInfo, { width: sWidth, height: sHeight }, [position])[0];
+        const markObj = new Sprite(new SpriteMaterial({ map: texture, color: 0xffffff, transparent:true, depthTest: false }));
+        const { x, y } = transformCoordinateSys(this.positionInfo, { width: sWidth, height: sHeight }, [position], this.camera.zoom)[0];
         const vector = new Vector3(x, y, 0);
         vector.unproject(this.camera);
         vector.setZ(this.zBase + z);
-        mark.position.copy(vector);
-        mark.scale.set(width,height,1);
-        this.markGroup.add(mark);
+        markObj.position.copy(vector);
+        markObj.scale.set(width,height,1);
+        markObj.userData = { ...mask };
+        console.log(markObj);
+        if(onClick) {
+            markObj.addEventListener('click', onClick);
+        }
+        if(dragable) {
+            markObj.addEventListener('drag', onDrag);
+            markObj.addEventListener('dragend', onDragStop);
+        }
+        this.markGroup.add(markObj);
     };
     render() {
-        const { style = {}, containerClass = '', children } = this.props;
+        const { style = {}, containerClass = '' } = this.props;
         const containerStyle = {  width: '100%', height: '100%', ...style, perspective: Sketchpad.perspective, position: 'absolute'};
         return <div ref={this.containerRef} className={`sketchpadContainers ${containerClass}`} style={containerStyle}>
             <canvas ref={this.canvasRef} className="canvasContent" style={{ width: '100%', height: '100%' }}>

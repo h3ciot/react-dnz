@@ -5,7 +5,7 @@
  * */
 
 const BaseConfig = {
-  backgroundColor: 0xffffff, // 背景色
+  backgroundColor: '#C0C0C0', // 背景色
   // perspective: 500, // 摄像机高度，内部使用,暂不暴露
   objectBaseColor: 0x696969, // 材质基础颜色
   objectSelectedColor: 0xff0000, // 选中对象颜色
