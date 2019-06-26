@@ -14,8 +14,7 @@ import {
   Vector3,
 } from 'three';
 
-// TODO 增加拖拽边界条件
-const DragControls = function (_objects, _camera, _domElement, _bound) {
+const DragControls = function (_objects, _camera, _domElement, _bound = {}) {
   if (_objects instanceof Camera) {
     console.warn('THREE.DragControls: Constructor now expects ( objects, camera, domElement )');
     const temp = _objects; _objects = _camera; _camera = temp;
@@ -74,7 +73,8 @@ const DragControls = function (_objects, _camera, _domElement, _bound) {
     if (_selected && scope.enabled) {
       if (_raycaster.ray.intersectPlane(_plane, _intersection)) {
         const {
-          left = 0, right = 0, top = 0, bottom = 0,
+          left = Number.MIN_SAFE_INTEGER, right = Number.MAX_SAFE_INTEGER,
+          top = Number.MIN_SAFE_INTEGER, bottom = Number.MAX_SAFE_INTEGER,
         } = _bound;
         const newPosition = _intersection.sub(_offset).applyMatrix4(_inverseMatrix);
         // 边界条件判断
@@ -143,7 +143,7 @@ const DragControls = function (_objects, _camera, _domElement, _bound) {
   function onDocumentMouseCancel(event) {
     event.preventDefault();
 
-    if (_selected) {
+    if (_selected && scope.enabled) {
       scope.dispatchEvent({ type: 'dragend', object: _selected });
 
       _selected = null;

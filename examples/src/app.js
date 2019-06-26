@@ -3,6 +3,7 @@ import Dragzoom, { DragzoomPolygon, DragzoomItems, DragzoomItem } from 'react-dn
 import { Popover, Button } from 'antd';
 import './index.css';
 import svg from './svg.svg';
+import svg1 from './(Share___)_SFont.CN.svg';
 const Polygon = DragzoomPolygon.Polygon
 export default class App extends React.Component{
   drawingRef: Object;
@@ -13,7 +14,7 @@ export default class App extends React.Component{
     this.drawingRef = React.createRef();
     this.state = {
       img: 'http://www.pconline.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
-      // img: svg,
+      // img: svg1,
       polygonList: [],
       currentPolygon: [],
       x: 1300,

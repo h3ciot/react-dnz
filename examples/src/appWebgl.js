@@ -64,7 +64,7 @@ export default class appWebgl extends Component<Props, State> {
         ];
         const dataUrl = "http://127.0.0.1:1234/scene.gltf";
         return <div style={{ width: '100%', height: '100%' }}>
-            <Sketchpad style={{ border: '1px solid #000'}} dataUrl={dataUrl} loadingStatus={this.loadingStatus} areaList={areaList} maskList={markList} captureClick = {true}>
+            <Sketchpad style={{ border: '1px solid #000'}} dataUrl={dataUrl} loadingStatus={this.loadingStatus} areaList={areaList} maskList={markList} captureClick = {true} model="3d">
                 <CustomItems>
                     <CustomItem key="top" position={{x: 100, y: 100}} offset={{top:0,left:0}}>
                         <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">
