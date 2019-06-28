@@ -8,7 +8,7 @@ import type { Size, Position } from "./TypeDec";
 // 获取webgl坐标[-1,1]
 // TODO 待优化，可以缓存
 export function transformCoordinateToWebgl(evt: {clientX: number, clientY: number}, offsetParent: Size, zoom = 1): Position {
-    const  { width, height, scrollLeft = 0, scrollTop = 0, left, top } = offsetParent;
+    const  { width = 0, height = 0, scrollLeft = 0, scrollTop = 0, left = 0, top = 0 } = offsetParent;
     const positionX = evt.clientX + scrollLeft - left;
     const positionY = evt.clientY + scrollTop - top;
     const x = (positionX / width * 2 - 1) * zoom;
@@ -64,7 +64,7 @@ export function generatePath(drawShape: string, drawPath: Array, radius: number)
   }
   return path;
 }
-type Mask = {
+type Mark = {
     key: string, //
     position: { x: number, y: number }, // 定位
     z: number, // z位置
@@ -72,9 +72,9 @@ type Mask = {
     content: string, // 文字内容
     width: number,
     height: number,
-    position: 'left' | 'top' | 'bottom' | 'right',
+    position: 'top' | 'bottom',
 };
-export function generateTextMark(mark: Mask, cb: canvas => null) {
+export function generateTextMark(mark: Mark, cb: canvas => null) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const { img, content, width, height } = mark;

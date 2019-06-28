@@ -97,7 +97,7 @@ const DragControls = function (_objects, _camera, _domElement, _bound = {}) {
     if (intersects.length > 0) {
       const object = intersects[0].object;
 
-      if (!object.userData.dragable) return;
+      if (!object.userData || !object.userData.dragable) return;
       _plane.setFromNormalAndCoplanarPoint(_camera.getWorldDirection(_plane.normal),
         _worldPosition.setFromMatrixPosition(object.matrixWorld));
 
@@ -125,7 +125,7 @@ const DragControls = function (_objects, _camera, _domElement, _bound = {}) {
     if (intersects.length > 0) {
       _selected = intersects[0].object;
 
-      if (!_selected.userData.dragable) {
+      if (!_selected.userData || !_selected.userData.dragable) {
         _selected = null;
         return;
       }
@@ -142,7 +142,6 @@ const DragControls = function (_objects, _camera, _domElement, _bound = {}) {
 
   function onDocumentMouseCancel(event) {
     event.preventDefault();
-
     if (_selected && scope.enabled) {
       scope.dispatchEvent({ type: 'dragend', object: _selected });
 

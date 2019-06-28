@@ -73,3 +73,41 @@ $ npm run build-es
 | capture | 是否捕获坐标 | boolean | false |
 | allowAnyClickToDrag | 是否允许任意键拖动 | boolean | false |
 | capturePosition | 捕获坐标函数 | (a:[number,number]) => mixed | (a:[number,number]) => null |
+
+## Sketchpad(3d环境组件)
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+|style|容器样式|Object| null|
+|containerClass|容器类名|string|null|
+|dataUrl|底图文件路径(gtlf格式,使用专用编辑器导出)|string|null|
+|capture|是否捕获坐标|boolean|false|
+|capturePosition|捕获坐标回调(将会捕获点击与移动事件)|(position: {x:number, y: number}, e: Event) => null|null
+|areaList|区域数据| Array<'Area'> | null |
+|markList|标记数据|Array<'Mark'>|null|
+|model|模式，2d模式下可进行交互，3d模式下仅用于查看|'2d|3d'|3d|
+|loadingStatus|底图文件加载进度回调|(err: Error, loading: boolean, percentage: number) => null|null|
+
+###Area
+    key: string // 索引
+	type: 'line'|'rect'|'circle'|'polygon' // 区域类型
+	points: Array // 区域坐标为[[1,1],[3,3]]类型
+	height: number // 区域高度
+	color: string // 颜色
+	radius： number // 区域类型为circle时存在，半径
+	z: number // 区域底部高度
+	onClick： (e: { type: string, event: Event }) => null //点击事件回调
+	showPoint: boolean // 显示顶点，建议仅用在绘制区域中
+
+###Mark
+    key: string, // 索引
+    position: { x: number, y: number }, // 定位坐标
+    z: number, // z位置
+    img: string, // 图片路径
+    content: string, // 文字内容
+    width: number, // 宽度，包含文字与图片
+    height: number, // 高度， 包含文字与图片内容
+    placement: 'top' | 'bottom', // 文字位置
+    onClick?: (e: { type: string, event: Event }) => null // 点击事件回调
+    dragable: boolean, // 能否进行拖拽
+    onDrag?: (e: { type: string, position: Position }) => null, // 拖拽事件回调
+    onDragStop?: (e: { type: string, position: Position }) => null // 拖拽结束回调

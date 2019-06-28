@@ -28,7 +28,7 @@ export default class DragzoomCanvas extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    this.updataCanvas(nextProps)
+    this.updateCanvas(nextProps)
   }
 
   componentWillUnmount() {
@@ -37,10 +37,10 @@ export default class DragzoomCanvas extends React.Component<Props, State> {
 
   initCanvas = () => {
     this.context2D = this.canvas.getContext("2d")
-    this.updataCanvas(this.props)
+    this.updateCanvas(this.props)
   }
 
-  updataCanvas = (props: Props) => {
+  updateCanvas = (props: Props) => {
     const context2D = this.context2D
     const {
       imageElement,
@@ -52,7 +52,6 @@ export default class DragzoomCanvas extends React.Component<Props, State> {
     this.canvas.width = containerSize.width
     this.canvas.height = containerSize.height
     context2D.clearRect(0, 0, containerSize.width, containerSize.height)
-    debugger;
     context2D.drawImage(
       imageElement,
       currentPosition.x, // 图像位置x
