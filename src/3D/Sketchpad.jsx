@@ -64,6 +64,7 @@ type Mark = {
     dragable: boolean,
     onDrag?: (e: { type: string, position: Position }) => null,
     onDragStop?: (e: { type: string, position: Position }) => null,
+    onClick?: (e: { type: string, event: Event }) => null,
 };
 type Props = {
     style?: Object, // 容器样式
