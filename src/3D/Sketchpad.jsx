@@ -39,7 +39,7 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { fromEvent, Subscription, partition } from "rxjs";
-import { map, filter } from 'rxjs/operators';
+import { map, filter, distinctUntilChanged } from 'rxjs/operators';
 type Area = {
     key: string, // 用于优化渲染机制
     type: 'line' | 'rect' | 'circle' | 'polygon',
@@ -365,7 +365,7 @@ export default class Sketchpad extends Component<Props, State> {
         window.addEventListener('resize', this.onResize);
         // 事件分流，根据是否捕获分流至两个处理函数
         const [captureEvent, clickEvent] = partition(fromEvent(canvas, 'click').pipe(
-            filter(() => this.control.enabled),         // 拖拽期间暂时关闭
+            // filter(() => this.control.enabled),         // 拖拽期间暂时关闭
             map(event => {
                 const { x, y } = transformCoordinateToWebgl(event, this.positionInfo);
                 const vector = new Vector3(x, y, 0);
@@ -373,7 +373,8 @@ export default class Sketchpad extends Component<Props, State> {
             }),
         ), e => this.props.capture && this.props.allowAnyClick && typeof e.event.button === 'number' && e.event.button === 0);
         this.eventSub.add(fromEvent(canvas, 'mousemove').pipe(
-            filter( () => this.control.enabled && this.props.capture),
+            filter( () => this.props.capture && this.props.model === '2d'),
+            distinctUntilChanged((p, q) => p.clientX === q.clientX && p.clientY === q.clientY),
             map(event => {
                 const { x, y } = transformCoordinateToWebgl(event, this.positionInfo);
                 const vector = new Vector3(x, y, 0);
@@ -396,8 +397,10 @@ export default class Sketchpad extends Component<Props, State> {
 
     // 将坐标转换后通过props传出
     capturePosition = ( e: { position: Position, event: Event }) => {
-        const { x, y } = transformWebgl(e.position, this.state.sceneSize);
-        this.props.capturePosition({ x, y }, e.event);
+        if(this.props.model === '2d') {
+            const { x, y } = transformWebgl(e.position, this.state.sceneSize);
+            this.props.capturePosition({ x, y }, e.event);
+        }
     };
 
     // 处理点击与选中事件

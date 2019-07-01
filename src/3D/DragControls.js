@@ -64,12 +64,16 @@ const DragControls = function (_objects, _camera, _domElement, _bound = {}) {
     event.preventDefault();
 
     const rect = _domElement.getBoundingClientRect();
+    const tempX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const tempY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    if (tempX === _mouse.x && tempY === _mouse.y) {
+      return false;
+    }
+    _mouse.x = tempX;
+    _mouse.y = tempY;
 
-    _mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    _mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     _raycaster.setFromCamera(_mouse, _camera);
-
     if (_selected && scope.enabled) {
       if (_raycaster.ray.intersectPlane(_plane, _intersection)) {
         const {
@@ -116,6 +120,9 @@ const DragControls = function (_objects, _camera, _domElement, _bound = {}) {
   }
 
   function onDocumentMouseDown(event) {
+    if (!scope.enabled) {
+      return;
+    }
     event.preventDefault();
 
     _raycaster.setFromCamera(_mouse, _camera);

@@ -4,7 +4,7 @@
  *
  **/
 import React, {Component} from 'react';
-import { Sketchpad, CustomItems, CustomItem } from 'react-dnz';
+import { Sketchpad } from 'react-dnz';
 import {Button, Popover} from "antd";
 import logo from './logo.svg';
 type Props = {};
@@ -123,14 +123,7 @@ export default class appWebgl extends Component<Props, State> {
     render() {
         const { dataUrl, markList, areaList } = this.state;
         return <div style={{ width: '100%', height: '100%' }}>
-            <Sketchpad style={{ border: '1px solid #000'}} capturePosition={this.captureClickPosition} dataUrl={dataUrl} loadingStatus={this.loadingStatus} areaList={areaList} markList={markList} capture = {true} model="3d">
-                <CustomItems>
-                    <CustomItem key="top" position={{x: 100, y: 100}} offset={{top:0,left:0}}>
-                        <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">
-                            <Button>topLeft</Button>
-                        </Popover>
-                    </CustomItem>
-                </CustomItems>
+            <Sketchpad style={{ border: '1px solid #000'}} capturePosition={this.captureClickPosition} dataUrl={dataUrl} loadingStatus={this.loadingStatus} areaList={areaList} markList={markList} capture = {true} model="2d">
             </Sketchpad>
         </div>;
     }
