@@ -111,3 +111,15 @@ $ npm run build-es
     dragable: boolean, // 能否进行拖拽
     onDrag?: (e: { type: string, position: Position }) => null, // 拖拽事件回调
     onDragStop?: (e: { type: string, position: Position }) => null // 拖拽结束回调
+
+#Polyfill(需要依赖以下es6特性)
+Promise, Map<br/>
+Array
+ - includes
+ - keys
+ - values
+String
+ - includes
+ - startsWith
+ - endsWith
+ 
