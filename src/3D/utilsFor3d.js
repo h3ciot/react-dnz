@@ -72,7 +72,7 @@ type Mark = {
     content: string, // 文字内容
     width: number,
     height: number,
-    position: 'top' | 'bottom',
+    placement: 'top' | 'bottom',
 };
 export function generateTextMark(mark: Mark, cb: canvas => null) {
     const canvas = document.createElement('canvas');

@@ -123,7 +123,7 @@ export default class appWebgl extends Component<Props, State> {
     render() {
         const { dataUrl, markList, areaList } = this.state;
         return <div style={{ width: '100%', height: '100%' }}>
-            <Sketchpad style={{ border: '1px solid #000'}} capturePosition={this.captureClickPosition} dataUrl={dataUrl} loadingStatus={this.loadingStatus} areaList={areaList} markList={markList} capture = {true} model="2d">
+            <Sketchpad style={{ border: '1px solid #000'}} capturePosition={this.captureClickPosition} dataUrl={dataUrl} loadingStatus={this.loadingStatus} areaList={areaList} markList={markList} capture = {false} model="2d">
             </Sketchpad>
         </div>;
     }

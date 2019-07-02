@@ -216,7 +216,6 @@ export default class Sketchpad extends Component<Props, State> {
     clearMark = () => {
         if(this.markGroup) {
             const children = this.markGroup.children;
-            this.markGroup.remove(...children);
             children.forEach( item => {
                 const { onClick, onDrag, onDragStop } = item.userData;
                 item.removeEventListener('click', onClick);
@@ -229,6 +228,7 @@ export default class Sketchpad extends Component<Props, State> {
                 item.material.map && item.material.map.dispose();
                 item.material && item.material.dispose();
             });
+            this.markGroup.remove(...children);
         }
     };
 
@@ -236,13 +236,13 @@ export default class Sketchpad extends Component<Props, State> {
     clearArea = () => {
         if(this.areaGroup) {
             const children = this.areaGroup.children;
-            this.areaGroup.remove(...children);
             children.forEach( item => {
                 const { onClick } = item.userData;
                 item.removeEventListener('click', onClick);
                 item.userData = null;
                 item.geometry.dispose();
             });
+            this.areaGroup.remove(...children);
         }
         if(this.pointGroup) {
             this.clearChildren(this.pointGroup);
@@ -262,15 +262,15 @@ export default class Sketchpad extends Component<Props, State> {
 
     // 递归释放资源
     clearChildren = (obj: Object3D) => {
-        if (obj.geometry && obj.geometry.isGeometry) {
+        if(obj.children) {
+            obj.children.forEach(this.clearChildren);
+            obj.remove(...obj.children);
+        }
+        if (obj.geometry && obj.geometry.dispose) {
             obj.geometry.dispose();
         }
-        if (obj.material && obj.material.isMaterial)  {
+        if (obj.material && obj.material.dispose)  {
             obj.material.dispose();
-        }
-        if(obj.children) {
-            obj.children.forEach(this.clearChildren)
-            obj.remove(...obj.children);
         }
         obj.dispose && obj.dispose();
     };
@@ -348,7 +348,7 @@ export default class Sketchpad extends Component<Props, State> {
         this.control = new OrbitControls(this.camera, this.containerRef.current);
         // 控制器使用上下左右平移
         this.control.screenSpacePanning = true;
-        this.scene.add(new AxesHelper(Math.max(clientHeight, clientWidth)));
+        // this.scene.add(new AxesHelper(Math.max(clientHeight, clientWidth)));
         // 初始化群组对象
         this.areaGroup = new Group();
         this.markGroup = new Group();
@@ -421,6 +421,7 @@ export default class Sketchpad extends Component<Props, State> {
         if (dataUrl) {
             const baseScene = this.scene.getObjectByProperty('uuid', this.dataSceneUuid);
             baseScene && this.clearChildren(baseScene);
+            this.scene.remove(baseScene);
             this.dataUrl = dataUrl;
             this.loader.load(dataUrl, gltf => {
                 if(dataUrl !== this.dataUrl) {
