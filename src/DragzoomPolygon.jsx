@@ -21,7 +21,18 @@ function isParentPropsEqual(a, b): boolean %checks {
 }
 
 function isPropsEqual(a, b): boolean %checks {
-  return isEqual(a, b, compareProps)
+  const aPath = a.path || [];
+  const bPath = b.path || [];
+  if(a.id !== b.id || aPath.length !== bPath.length) {
+    return false;
+  }
+  const len = a.path.length;
+  for(let i = 0; i< len; i++) {
+    if (aPath[i][0] !== b.path[i][0] || a.path[i][1] !== b.path[i][1]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function checkoutDbClick(fn: Function, time=100) {
@@ -204,56 +215,117 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     this.updataCanvas(this.props)
   }
 
-  renderPolygon = (path: Path, childProps: Object) => {
-    const { capture, id, polygonDrag, path: childPath, color, shape, vertex = true } = childProps
-    const context2D = this.context2D
-    context2D.save()
-    context2D.beginPath()
-    const { controlPaint } = this.props
-    const defaultPaint = !controlPaint || !controlPaint(context2D, {id: id, path, color, shape})
-    if(defaultPaint) {
-      context2D.strokeStyle = 'rgba(0,0,0,1)'
-      context2D.fillStyle = 'rgba(255,255,255,0)'
-      context2D.lineWidth = 5
-      path.forEach((point, index) => {
-        const [x, y] = point
-        if(index === 0) context2D.moveTo(x,y)
-        else context2D.lineTo(x, y)
-        // context2D.arc(x,y,5,0,2*Math.PI)
-        // if(path.length === index+1) context2D.lineTo(path[0][0], path[0][1])
-      })
-    }
-    // 选择要拖动的图形
-    if(this.position && !capture && polygonDrag) {
-      const [x, y] = this.position
-      if(context2D.isPointInPath(x, y)){
-        this.position = void 0
-        this.dragPolygon[id] = true
-        // path 为真实路径
-        this.props.onPolygonDragStart(id, childPath, this.event)
-        this.event = void 0
-        context2D.strokeStyle = 'rgba(255,255,255,0)'
-        context2D.fillStyle = 'rgba(255,255,255,0)'
+  // renderPolygon = (path: Path, childProps: Object) => {
+  //   const { capture, id, polygonDrag, path: childPath, color, shape, vertex = true } = childProps
+  //   console.log('id:', id);
+  //   const context2D = this.context2D
+  //   context2D.save()
+  //   context2D.beginPath()
+  //   const { controlPaint } = this.props
+  //   const defaultPaint = !controlPaint || !controlPaint(context2D, {id: id, path, color, shape})
+  //   if(defaultPaint) {
+  //     context2D.strokeStyle = 'rgba(0,0,0,1)'
+  //     context2D.fillStyle = 'rgba(255,255,255,0)'
+  //     context2D.lineWidth = 5
+  //     path.forEach((point, index) => {
+  //       const [x, y] = point
+  //       if(index === 0) context2D.moveTo(x,y)
+  //       else context2D.lineTo(x, y)
+  //       // context2D.arc(x,y,5,0,2*Math.PI)
+  //       // if(path.length === index+1) context2D.lineTo(path[0][0], path[0][1])
+  //     })
+  //   }
+  //   // 选择要拖动的图形
+  //   if(this.position && !capture && polygonDrag) {
+  //     const [x, y] = this.position
+  //     if(context2D.isPointInPath(x, y)){
+  //       this.position = void 0
+  //       this.dragPolygon[id] = true
+  //       // path 为真实路径
+  //       this.props.onPolygonDragStart(id, childPath, this.event)
+  //       this.event = void 0
+  //       context2D.strokeStyle = 'rgba(255,255,255,0)'
+  //       context2D.fillStyle = 'rgba(255,255,255,0)'
+  //     }
+  //   }
+  //   context2D.fill()
+  //   context2D.stroke()
+  //   context2D.closePath()
+  //   if (vertex) {
+  //     path.forEach((point, index) => {
+  //       const [x, y] = point
+  //       context2D.beginPath()
+  //       context2D.lineWidth=3    //重新设置画笔
+  //       context2D.strokeStyle="green"
+  //       context2D.fillStyle="rgb(255,255,255)"   //设置填充的颜色
+  //       context2D.arc(x,y,3,0,2*Math.PI)
+  //       context2D.stroke()
+  //       context2D.fill()
+  //       context2D.closePath()
+  //     })
+  //   }
+  // }
+
+  renderPolygon = (paths: Array<Object> = []) => {
+    const len = paths.length;
+    const context2D = this.context2D;
+    context2D.save();
+    context2D.strokeStyle = 'rgba(0,0,0,1)';
+    context2D.fillStyle = 'rgba(255,255,255,0)';
+    context2D.lineWidth = 5;
+    const vertexPoints = [];
+    const { controlPaint } = this.props;
+    context2D.beginPath();
+    for(let i = 0; i < len; i++) {
+      const { path, capture, id, polygonDrag, childPath, color, shape, vertex = true } = paths[i];
+      const defaultPaint = !controlPaint || !controlPaint(context2D, {id: id, path, color, shape})
+      if(defaultPaint) {
+        path.forEach((point, index) => {
+          const [x, y] = point
+          if(index === 0) context2D.moveTo(x,y)
+          else context2D.lineTo(x, y)
+          // context2D.arc(x,y,5,0,2*Math.PI)
+          // if(path.length === index+1) context2D.lineTo(path[0][0], path[0][1])
+        })
+      }
+      // 选择要拖动的图形
+      if(this.position && !capture && polygonDrag) {
+        const [x, y] = this.position
+        if(context2D.isPointInPath(x, y)){
+          this.position = void 0
+          this.dragPolygon[id] = true
+          // path 为真实路径
+          this.props.onPolygonDragStart(id, childPath, this.event)
+          this.event = void 0
+          // unknow use remove it
+          // context2D.strokeStyle = 'rgba(255,255,255,0)'
+          // context2D.fillStyle = 'rgba(255,255,255,0)'
+        }
+      }
+
+      if (vertex) {
+        vertexPoints.push(...path);
       }
     }
     context2D.fill()
     context2D.stroke()
     context2D.closePath()
-    if (vertex) {
-      path.forEach((point, index) => {
+    // console.log(vertexPoints);
+    if (vertexPoints.length) {
+      context2D.lineWidth=3    //重新设置画笔
+      context2D.strokeStyle="green"
+      context2D.fillStyle="rgb(255,255,255)"   //设置填充的颜色
+      context2D.beginPath()
+      vertexPoints.forEach((point) => {
         const [x, y] = point
-        context2D.beginPath()
-        context2D.lineWidth=3    //重新设置画笔
-        context2D.strokeStyle="green"
-        context2D.fillStyle="rgb(255,255,255)"   //设置填充的颜色
+        context2D.moveTo(x, y);
         context2D.arc(x,y,3,0,2*Math.PI)
-        context2D.stroke()
-        context2D.fill()
-        context2D.closePath()
       })
+      context2D.stroke()
+      context2D.fill()
+      context2D.closePath()
     }
   }
-
   updataCanvas = (props: Props) => {
     const {
       containerSize: {width, height},
@@ -266,24 +338,30 @@ export default class DragzoomPolygon extends React.Component<Props, State> {
     this.canvas.height = height
     const context2D = this.context2D
     context2D.clearRect(0, 0, width, height)
+    const paths = [];
     React.Children.forEach(props.children, child => {
-      let { path, polygonDrag, color, shape, vertex } = child.props
+      const { path, polygonDrag, color, shape, vertex } = child.props
       const id = child.key
       if (this.dragPolygon[id]) return  // 当前是否有处于拖动状态的图形
-      const propsEqual = isPropsEqual({path:this.lastPropsPath[id]}, { path })
+      // const propsEqual = isPropsEqual({path:this.lastPropsPath[id]}, { path })
       // 如果props的值已经变化，则赋值给childPath, 并存为上一次的值，也适用于初始化
-      if(!propsEqual) {
+      // if(!propsEqual) {
         this.lastPropsPath[id] = path
         this.childPath[id] = path
-      }
-      path = this.childPath[id] // 从childPath里取出对应的路径
-      this.renderPolygon(props.calculateAllPosition(path), { capture, id, path, polygonDrag, color, shape, vertex })
+      // }
+      // path = this.childPath[id] // 从childPath里取出对应的路径
+      paths.push({ path: props.calculateAllPosition(path), capture, id, childPath: path, polygonDrag, color, shape, vertex });
+      // this.renderPolygon(props.calculateAllPosition(path), { capture, id, path, polygonDrag, color, shape, vertex })
     })
+    // console.log('a');
+    // console.log(paths);
+    this.renderPolygon(paths);
     this.position = void 0
   }
 
   render() {
     const { style } = this.props;
+    // console.log(this.props.currentPosition);
     return (
       <canvas
         ref={ (rn: any) => this.canvas = rn}

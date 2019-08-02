@@ -567,6 +567,7 @@ export default class Dragzoom extends React.Component<Props, State> {
 
   /** 开始容器拖拽, 同时改变上面的点， 此时不能停止更新 */
   handleDrag = (e: Event, ui: Object) => {
+    console.log('drag');
     if (this.actualImageSize.width <= 0) {
       return
     }
@@ -632,6 +633,7 @@ export default class Dragzoom extends React.Component<Props, State> {
 
   /** 自定义图层拖拽 */
   handleChildDrag = (e: Event, ui: Object) => {
+    console.log('children');
     if (this.actualImageSize.width <= 0) return
     const { childDragProps } = this.state
     const { x, y } = ui
@@ -763,6 +765,7 @@ export default class Dragzoom extends React.Component<Props, State> {
       cursor: canDraggable ? 'move' : 'auto',
     }
     const showScale = (scaleNum * 100).toFixed(0)
+    console.log(this.state.currentPosition)
     return (
       <div ref={(ele?: Object) => { ele ? this.dawingContainer = ele : null }} className="dragzoom" id="dragzoom" style={{ position: 'relative', ...this.props.style }} >
         <img ref={(rn: any) => this.imageElement = rn} src={img} onLoad={(e) => this.imageOnLoad(e, img)} style={{display: 'none'}} />

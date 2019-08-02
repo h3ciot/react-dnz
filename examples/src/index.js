@@ -12,6 +12,6 @@ for(var i=0;i<1;i++){
 const Test = () => (<div>test hello word</div>)
 
 ReactDOM.render(
-  <AppWebgl key='1'/>,
+  <App1 key='1'/>,
   document.getElementById('root')
 )

@@ -201,8 +201,8 @@ export default class DragzoomItems extends React.Component<Props, State> {
   getActualPosition = (point: Point) => {
     const { currentPosition, currentSize, actualImageSize } = this.props
     const { x, y, id, offset } = point
-    const width = x - currentPosition.x + offset.left
-    const height = y - currentPosition.y + offset.top
+    const width = x - offset.left
+    const height = y - offset.top
     const scale = currentSize.width / actualImageSize.width
     const newWidth = width / scale
     const newHeight = height / scale
@@ -231,6 +231,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
   }
 
   render() {
+    console.log(this.props);
     return (
       <div style={{ ...this.props.containersStyle, position: 'absolute', top: '0px', left: '0px', height: '0px' }}>
         {React.Children.map(this.props.children, this.renderItem)}
