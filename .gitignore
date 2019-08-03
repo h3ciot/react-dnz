@@ -8,3 +8,4 @@ dist
 /lib/
 *.log
 .DS_Store
+coverage/
