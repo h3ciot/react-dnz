@@ -2,29 +2,16 @@
  * @flow
  */
 import React from 'react'
-import type { Size, Point, Position } from './Dragzoom'
+import type { Point, Position } from './Dragzoom'
 
 function noop() {}
-
-function isEuqal(obj1, obj2) {
-  return JSON.stringify(obj1) === JSON.stringify(obj2)
-}
-
 type Props = {
-  // pointsDisabled: boolean,
-  // onDrag: Function,
-  // onDragStop: Function,
-  // getChildPosition: Function,
-  // getActualPosition: Function,
-  // childProps: {
-  //   onControlledDrag: Function,
-  // },
-  containersStyle: Object,
 //   v2
+  style: Object,
   scale: number,
   children: any,
-  onDragStart: Function,
-  onDragStop: Function,
+  onDrag: (position: Position, e: Event) => null,
+  onDragStop: (position: Position, e: Event ) => null,
 }
 
 type State = {
@@ -36,6 +23,8 @@ export default class DragzoomItems extends React.Component<Props, State> {
   static isDragItems = "DragzoomItems.V2";
   static defaultProps = {
     pointsDisabled: false,
+    onDrag: noop,
+    onDragStop: noop,
   };
 
   constructor(props: Props) {
@@ -62,7 +51,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
   }
 
   /**
-   * 传入未经计算过的点位信息，返回相对于拖动层的图片位置,带偏移量的点需要进行偏移校正
+   * 返回新点位坐标
    * @param point 点位信息
    * @param props props,包含定位信息
    */
@@ -77,50 +66,55 @@ export default class DragzoomItems extends React.Component<Props, State> {
   /**
    * 控制点位的拖动
    * @param id 点位的key(唯一标识符)
-   * @param postition 点位的位置
+   * @param position 点位的位置
+   * @param e 事件对象
    */
-  onDrag = (id: string, position: Position) => {
-    const { controlledPositions } = this.state
-    controlledPositions[id] = { ...controlledPositions[id], ...position }
-    this.setState({ controlledPositions })
+  onDrag = (id: string, position: Position, e: Event) => {
+    e.stopPropagation();
     if(this.props.onDrag) {
-      const newPoint = this.getActualPosition(controlledPositions[id])
-      this.props.onDrag(newPoint)
+      const { actualPoint } = this.getActualPosition(id, position);
+      this.props.onDrag(actualPoint, e);
     }
-  }
+  };
 
   /**
    * 获取到点位的真实坐标
+   * @param id 拖拽点位id
    * @param point 点位信息
+   * @return newPoint 新的点位信息
+   * @return actualPoint 真实坐标
    */
-  getActualPosition = (point: Point) => {
-    const { currentPosition, currentSize, actualImageSize } = this.props
-    const { x, y, id, offset } = point
-    const width = x - currentPosition.x + offset.left
-    const height = y - currentPosition.y + offset.top
-    const scale = currentSize.width / actualImageSize.width
-    const newWidth = width / scale
-    const newHeight = height / scale
-    return ({ x: Number(newWidth.toFixed(2)), y: Number(newHeight.toFixed(2)), id })
-  }
+  getActualPosition = (id: string, point: Position) => {
+    const { controlledPositions } = this.state;
+    const { scale } = this.props;
+    const { offset, x, y } = controlledPositions[id];
+    const newX = point.x + x;
+    const newY = point.y + y;
+    const actualX = (newX + offset.left) / scale;
+    const actualY = (newY + offset.top) / scale;
+    return ( {newPoint:{ x: newX, y: newY, id }, actualPoint: { x: actualX, y: actualY, id }});
+  };
 
-  onDragStop = (id: string ) => {
-    const point = this.getboundPosition(id)
+  onDragStop = (id: string, position: Position, e: Event ) => {
+    e.stopPropagation();
+    const { newPoint, actualPoint } = this.getActualPosition(id, position);
+    const { controlledPositions } = this.state;
+    controlledPositions[id] = { ...controlledPositions[id], ...newPoint };
+    this.setState({ controlledPositions: { ...controlledPositions }});
     if(this.props.onDragStop) {
-      const newPoint = this.getActualPosition(point)
-      this.props.onDragStop(newPoint)
+      this.props.onDragStop(actualPoint, e);
     }
-  }
+  };
 
   renderItem = (child: any) => {
-    // console.log(child);
     if(child.type && child.type.isDragzoomItem === "DragzoomItem.V2") {
       const { key: id } = child;
       const { controlledPositions } = this.state;
       const childProps = {
         id,
         position: controlledPositions[id],
-        // pointsDisabled: this.props.pointsDisabled,
+        onDragStop: this.onDragStop,
+        onDrag: this.onDrag,
       };
       return React.cloneElement(child, childProps)
     }
@@ -128,9 +122,9 @@ export default class DragzoomItems extends React.Component<Props, State> {
   };
 
   render() {
-    const { containersStyle } = this.props;
+    const { style } = this.props;
     return (
-      <div className="drag-zoom-items-containers" style={{ ...containersStyle }}>
+      <div className="drag-zoom-items-containers" style={{ ...style, position: 'absolute', left: 0, top: 0, width: 0, height: 0 }}>
         {React.Children.map(this.props.children, this.renderItem)}
       </div>
     )

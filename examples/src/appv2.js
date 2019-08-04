@@ -21,7 +21,7 @@ export default class App extends React.Component{
             // polygonList: [],
             currentPolygon: [],
             points: Mock.mock({
-              "points|200": [{
+              "points|400": [{
                 "x|100-1000":1,
                 "y|100-1000":1
               }]
@@ -129,7 +129,7 @@ export default class App extends React.Component{
                     <DragzoomItems>
                         <DragzoomItem key="top" position={{x: this.state.x, y: this.state.y}} offset={{top:0,left:0}} >
                             <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">
-                                <Button onClick={() => this.fixContent({ x: this.state.x, y: this.state.y, width: 232, height: 334, offset:{top:10,left:10} }, 'bottomRight')}>topLeft</Button>
+                                <Button>topLeft</Button>
                             </Popover>
                         </DragzoomItem>
                         {this.state.points.map((point,i) => <DragzoomItem key={i} position={{x:point.x, y:point.y}} offset={{top:10,left:10}} >
