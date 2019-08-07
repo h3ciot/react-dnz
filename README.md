@@ -36,7 +36,7 @@ $ npm run build-es
 | dragControlPaint | 控制拖拽时自定义图层的绘画 | String | - |
 | getSVGSize | 获取svg格式的背景图的实际大小 | (size: { width: number, height: number }) => mixed | - |
 |allowAnyClickToDrag | 是否允许任意键拖动 | boolean | false |
-| fixContent(实例方法)| 自适应弹出框内容(x,y为左上角定位) | (position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: 'top' &#166; 'left' &#166; 'right' &#166; 'bottom' &#166; 'topLeft' &#166; 'topRight' &#166; 'bottomLeft' &#166; 'bottomRight' &#166; 'leftTop' &#166; 'leftBottom' &#166; 'rightTop' &#166; 'rightBottom') {
+| fixContent(实例方法)| 自适应弹出框内容(x,y为左上角定位) | (position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: 'top' &#166; 'left' &#166; 'right' &#166; 'bottom' &#166; 'topLeft' &#166; 'topRight' &#166; 'bottomLeft' &#166; 'bottomRight' &#166; 'leftTop' &#166; 'leftBottom' &#166; 'rightTop' &#166; 'rightBottom') |
 ## DragzoomPolygon
 
 | props     | Description                              | Type       | Default |
@@ -73,3 +73,62 @@ $ npm run build-es
 | capture | 是否捕获坐标 | boolean | false |
 | allowAnyClickToDrag | 是否允许任意键拖动 | boolean | false |
 | capturePosition | 捕获坐标函数 | (a:[number,number]) => mixed | (a:[number,number]) => null |
+
+
+#V2
+import { V2 } from 'react-dnz';
+## Dragzoom
+
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+| img | 背景图url | string | '' |
+| style | 容器样式 | HTMLStyleElement | {} |
+| maxScale | 最大缩放层级 | number | 2 |
+| scalable | 是否可以缩放 | boolean | true |
+| draggable | 图层是否可以拖动 | boolean | true |
+| onSizeChange | 图层大小变化时的回调,包括图片路径变更 | (e:Event, position: {x: number, y: number }) => null | NOOP |
+| onDragStop | 图层拖动结束时的回调 | (e:Event, position: {x: number, y: number }) => null| - |
+| allowAnyClick | 是否允许任意键拖动 | boolean | false |
+| fixContent(实例方法)| 自适应弹出框内容(x,y为左上角定位) | (position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: 'top' &#166; 'left' &#166; 'right' &#166; 'bottom' &#166; 'topLeft' &#166; 'topRight' &#166; 'bottomLeft' &#166; 'bottomRight' &#166; 'leftTop' &#166; 'leftBottom' &#166; 'rightTop' &#166; 'rightBottom') |
+
+## DragzoomPolygon
+(处于性能考虑，此处尽量统一样式，并且剥离绘制捕获内容至单独组件)
+
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+| style | 容器样式 | HTMLStyleElement | {} |
+| controlPaint | 图层自定义绘制方法, 返回false则采用默认绘制方法 | (context:CanvasRenderingContext2D ,props:{id:string,path:Path,color:Object,shape:string}) => boolean | () => false |
+| pathStyle | 路径填充样式 | { strokeStyle: string,fillStyle: string,lineWidth: string } | {fillStyle: 'rgba(0, 132, 255, 0.2)',strokeStyle: '#4C98FF',lineWidth: 2,} |
+| vertexStyle | 端点填充样式 | { strokeStyle: string,fillStyle: string,lineWidth: string } | {fillStyle: 'rgb(255,255,255)',strokeStyle: 'green',lineWidth: 3,} |
+| polygons | 自定义图层 | Polygon | []
+
+### DragzoomPolygon.Polygon
+
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+| path | 自定义图层的路径 | Array<[number,number]> | [] |
+| id | 唯一标识 | string | '' |
+| color | 图层颜色 | Object | {} |
+| shape | 形状 | string | '' |
+| vertex | 是否绘制端点 | boolean | true |
+| dash | 虚线分段数据，形如[5,10], 代表虚线长度为5，间隔为10 | string | '' |
+
+
+## DragzoomItems
+
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+| style | 容器样式 | HTMLStyleElement | {} |
+| onDrag | 拖动时的回调 | (position: Position, e: Event) => null | (point: Point) => mixed |
+| onDragStop | 拖动结束时的回调 | (position: Position, e: Event) => null | (point: Point) => mixed |
+
+## DragzoomItem
+
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+| id | 点位id | boolean | false |
+| children| 子项 | React.Node | null |
+| disabled | 是否禁用拖动 | boolean | true |
+| position | 定位坐标 | {x: number, y: number} | {x: 0, y: 0} |
+| offset | 偏移量 | { left: number, top: number } | {left: 0, top: 0} |
+

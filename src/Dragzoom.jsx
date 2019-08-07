@@ -9,7 +9,7 @@ import Draggable from 'react-draggable'
 import DragzoomCanvas from './DragzoomCanvas'
 import DragzoomSinglePolygon from './DragzoomSinglePolygon'
 import { getinlinePosition, addEvent, removeEvent } from './utils'
-
+import './index.css'
 function noop() {}
 const uninitialSize = { width: 0, height: 0 }
 

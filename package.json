@@ -1,11 +1,11 @@
 {
   "name": "react-dnz",
-  "version": "1.3.3",
+  "version": "1.4.0-beta",
   "description": "React drag and zoom component",
   "main": "index.js",
   "scripts": {
     "build": "yarn run build-es",
-    "build-es": "babel src --out-dir es --ignore test.js && lessc src/index.css > es/index.css ",
+    "build-es": "babel src --out-dir es --ignore test.js && lessc src/index.css > es/index.css && lessc src/v2/index.css > es/v2/index.css",
     "prepublish": "yarn run build",
     "start": "cd examples && yarn start",
     "test": "jest",

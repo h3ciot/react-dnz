@@ -3,8 +3,21 @@
  * @flow
  *
  * */
-import Dragzoom from './Dragzoom';
-import DragzoomItems from './DragzoomItems';
-import DragzoomItem from './DragzoomItem';
-const V2 = { Dragzoom, DragzoomItems, DragzoomItem };
+import DragZoom from './DragZoom';
+import DragZoomItems from './DragZoomItems';
+import DragZoomItem from './DragZoomItem';
+import DragZoomPolygon from './DragZoomPolygon';
+import DragZoomCanvas from './DragZoomCanvas';
+import { CIRCLE, POLYGON, RECTANGLE } from "./Type";
+
+const V2 = {
+  DragZoom,
+  DragZoomItems,
+  DragZoomItem,
+  DragZoomPolygon,
+  DragZoomCanvas,
+  DrawType: {
+    CIRCLE, POLYGON, RECTANGLE,
+  },
+};
 export default V2;

@@ -1,32 +1,28 @@
 /**
  * @flow
  */
-import React from 'react'
-import type { Point, Position } from './Dragzoom'
-
+import React from 'react';
+import type { Point, Position } from './Type';
+import connect from './ContextUtils';
 function noop() {}
 type Props = {
-//   v2
   style: Object,
   scale: number,
   children: any,
   onDrag: (position: Position, e: Event) => null,
   onDragStop: (position: Position, e: Event ) => null,
+  currentSize: { width: number, height: number },
 }
-
 type State = {
   controlledPositions: {[string]: Point} // 点位信息
 }
-
-export default class DragzoomItems extends React.Component<Props, State> {
+class DragZoomItems extends React.Component<Props, State> {
 
   static isDragItems = "DragzoomItems.V2";
   static defaultProps = {
-    pointsDisabled: false,
     onDrag: noop,
     onDragStop: noop,
   };
-
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -49,17 +45,17 @@ export default class DragzoomItems extends React.Component<Props, State> {
       this.setState({ controlledPositions: this.resetPosition(nextProps) })
     }
   }
-
-  /**
+    /**
    * 返回新点位坐标
    * @param point 点位信息
    * @param props props,包含定位信息
    */
-  calculatePosition = (point: Point, props: Props = this.props): Point => {
-    const { scale } = props;
+  calculatePosition = (point: Point, props: Props): Point => {
+    const { scale, currentSize } = props;
+    const { width, height } = currentSize;
     const { x, y, offset } = point;
-    const newX = x * scale - offset.left;
-    const newY = y * scale - offset.top;
+    const newX = Math.max(0, Math.min(x*scale, width)) - offset.left;
+    const newY = Math.max(0, Math.min(y*scale, height)) * scale - offset.top;
     return ({ offset, x: newX, y: newY });
   };
 
@@ -112,7 +108,7 @@ export default class DragzoomItems extends React.Component<Props, State> {
       const { controlledPositions } = this.state;
       const childProps = {
         id,
-        position: controlledPositions[id],
+        position: controlledPositions[id] || {},
         onDragStop: this.onDragStop,
         onDrag: this.onDrag,
       };
@@ -130,3 +126,5 @@ export default class DragzoomItems extends React.Component<Props, State> {
     )
   }
 }
+
+export default connect(DragZoomItems);
