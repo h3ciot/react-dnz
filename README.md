@@ -77,7 +77,7 @@ $ npm run build-es
 
 #V2
 import { V2 } from 'react-dnz';
-## Dragzoom
+## DragZoom
 
 | props     | Description                              | Type       | Default |
 |-----------|------------------------------------------|------------|---------|
@@ -91,7 +91,7 @@ import { V2 } from 'react-dnz';
 | allowAnyClick | 是否允许任意键拖动 | boolean | false |
 | fixContent(实例方法)| 自适应弹出框内容(x,y为左上角定位) | (position: { x: number, y: number, width: number, height: number, offset: { top: number, left: number } }, placement: 'top' &#166; 'left' &#166; 'right' &#166; 'bottom' &#166; 'topLeft' &#166; 'topRight' &#166; 'bottomLeft' &#166; 'bottomRight' &#166; 'leftTop' &#166; 'leftBottom' &#166; 'rightTop' &#166; 'rightBottom') |
 
-## DragzoomPolygon
+## DragZoomPolygon
 (处于性能考虑，此处尽量统一样式，并且剥离绘制捕获内容至单独组件)
 
 | props     | Description                              | Type       | Default |
@@ -102,7 +102,7 @@ import { V2 } from 'react-dnz';
 | vertexStyle | 端点填充样式 | { strokeStyle: string,fillStyle: string,lineWidth: string } | {fillStyle: 'rgb(255,255,255)',strokeStyle: 'green',lineWidth: 3,} |
 | polygons | 自定义图层 | Polygon | []
 
-### DragzoomPolygon.Polygon
+### DragZoomPolygon.Polygon
 
 | props     | Description                              | Type       | Default |
 |-----------|------------------------------------------|------------|---------|
@@ -110,19 +110,20 @@ import { V2 } from 'react-dnz';
 | id | 唯一标识 | string | '' |
 | color | 图层颜色 | Object | {} |
 | shape | 形状 | string | '' |
+| custom | 是否自定义绘制 | boolean | false |
 | vertex | 是否绘制端点 | boolean | true |
 | dash | 虚线分段数据，形如[5,10], 代表虚线长度为5，间隔为10 | string | '' |
 
 
-## DragzoomItems
+## DragZoomItems
 
 | props     | Description                              | Type       | Default |
 |-----------|------------------------------------------|------------|---------|
 | style | 容器样式 | HTMLStyleElement | {} |
-| onDrag | 拖动时的回调 | (position: Position, e: Event) => null | (point: Point) => mixed |
-| onDragStop | 拖动结束时的回调 | (position: Position, e: Event) => null | (point: Point) => mixed |
+| onDrag | 拖动时的回调 | (id: string, position: Position, e: Event) => null | (point: Point) => mixed |
+| onDragStop | 拖动结束时的回调 | (id: string, position: Position, e: Event) => null | (point: Point) => mixed |
 
-## DragzoomItem
+## DragZoomItem
 
 | props     | Description                              | Type       | Default |
 |-----------|------------------------------------------|------------|---------|
@@ -132,3 +133,17 @@ import { V2 } from 'react-dnz';
 | position | 定位坐标 | {x: number, y: number} | {x: 0, y: 0} |
 | offset | 偏移量 | { left: number, top: number } | {left: 0, top: 0} |
 
+
+## DragZoomCanvas(该组件用于绘制变化部分，所有路径都会被自定义绘制)
+
+| props     | Description                              | Type       | Default |
+|-----------|------------------------------------------|------------|---------|
+| capture | 捕获坐标 | boolean | false |
+| onMouseMove| 鼠标移动 | (position: Position, e: Event) => null | f => f |
+| onDoubleClick | 双击事件 | (position: Position, e: Event) => null | f => f |
+| onClick | 单击事件 | (position: Position, e: Event) => null | f => f |
+| controlPaint | 偏移量 | (context:CanvasRenderingContext2D ,props:{id:string,path:Path,color:string,shape:string}) => mixed | f => f |
+
+
+## DragZoomCanvas.Path
+详见 DragZoomPolygon.Polygon

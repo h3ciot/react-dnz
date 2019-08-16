@@ -9,8 +9,8 @@ type Props = {
   style: Object,
   scale: number,
   children: any,
-  onDrag: (position: Position, e: Event) => null,
-  onDragStop: (position: Position, e: Event ) => null,
+  onDrag: (id: string, position: Position, e: Event) => null,
+  onDragStop: (id: string, position: Position, e: Event ) => null,
   currentSize: { width: number, height: number },
 }
 type State = {
@@ -33,10 +33,12 @@ class DragZoomItems extends React.Component<Props, State> {
   resetPosition = (props: Props) => {
     const controlledPositions  = {};
     React.Children.forEach(props.children, (child) => {
-      const { key: id, props: childProps } = child;
-      const { position, offset = { top: 0, left: 0} } = childProps;
-      controlledPositions[id] = this.calculatePosition({...position, offset}, props);
-      controlledPositions[id].id = id
+      if(child) {
+        const { key: id, props: childProps } = child;
+        const { position, offset = { top: 0, left: 0} } = childProps;
+        controlledPositions[id] = this.calculatePosition({...position, offset}, props);
+        controlledPositions[id].id = id
+      }
     });
     return controlledPositions;
   };
@@ -55,7 +57,7 @@ class DragZoomItems extends React.Component<Props, State> {
     const { width, height } = currentSize;
     const { x, y, offset } = point;
     const newX = Math.max(0, Math.min(x*scale, width)) - offset.left;
-    const newY = Math.max(0, Math.min(y*scale, height)) * scale - offset.top;
+    const newY = Math.max(0, Math.min(y*scale, height)) - offset.top;
     return ({ offset, x: newX, y: newY });
   };
 
@@ -98,7 +100,7 @@ class DragZoomItems extends React.Component<Props, State> {
     controlledPositions[id] = { ...controlledPositions[id], ...newPoint };
     this.setState({ controlledPositions: { ...controlledPositions }});
     if(this.props.onDragStop) {
-      this.props.onDragStop(actualPoint, e);
+      this.props.onDragStop(id, actualPoint, e);
     }
   };
 

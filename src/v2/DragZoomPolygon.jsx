@@ -12,6 +12,7 @@ type Polygon = {
     shape: RECTANGLE| CIRCLE | POLYGON,
     vertex: boolean,
     dash: Array<number>,
+    custom: boolean,
 }
 type Props = {
   controlPaint: (context:CanvasRenderingContext2D ,props:{id:string,path:Path,color:Object,shape:string}) => boolean,
@@ -83,9 +84,9 @@ class DragZoomPolygon extends React.Component<Props, State> {
     context2D.strokeStyle = pathStyle.strokeStyle;
     context2D.fillStyle = pathStyle.fillStyle;
     context2D.lineWidth = pathStyle.lineWidth;
-    context2D.beginPath();
     const len = paths.length;
     for(let i = 0; i < len; i++) {
+      context2D.beginPath();
       const { path, shape, dash = [] } = paths[i];
       context2D.setLineDash(dash);
       switch (shape) {
@@ -117,10 +118,10 @@ class DragZoomPolygon extends React.Component<Props, State> {
           });
           break;
       }
+      context2D.stroke();
+      context2D.fill();
+      context2D.closePath();
     }
-    context2D.stroke();
-    context2D.fill();
-    context2D.closePath();
   };
 
   renderPoint = (paths: Array<Path>) => {
@@ -132,6 +133,7 @@ class DragZoomPolygon extends React.Component<Props, State> {
     context2D.strokeStyle = vertexStyle.strokeStyle;
     context2D.fillStyle = vertexStyle.fillStyle;
     context2D.lineWidth = vertexStyle.lineWidth;
+    context2D.setLineDash([]);
     context2D.beginPath();
     paths.forEach(path => {
       path.forEach(point => {
@@ -140,9 +142,9 @@ class DragZoomPolygon extends React.Component<Props, State> {
         context2D.arc(x,y,3,0,2*Math.PI);
       });
     });
+    context2D.closePath();
     context2D.stroke();
     context2D.fill();
-    context2D.closePath();
   };
   redrawCanvas = (props: Props) => {
     const canvas = this.canvasRef.current;
@@ -157,13 +159,15 @@ class DragZoomPolygon extends React.Component<Props, State> {
     const paths = [];
     const points = [];
     polygons.forEach(polygon => {
-        const { path: oldPath, color, shape, vertex = true, dash, id } = polygon;
+        const { path: oldPath, color, shape, vertex = true, dash, id, custom } = polygon;
         const path = this.getAllDrawPosition(oldPath, props);
-        if(!controlPaint(context2D, {id, path, color, shape})) {
+        if(!custom) {
           if(vertex) {
             points.push(path);
           }
           paths.push({ path, shape, dash });
+        } else {
+          controlPaint(context2D, { id, path, color, shape, vertex, dash });
         }
     });
     this.renderPolygons(paths);

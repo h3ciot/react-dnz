@@ -65,10 +65,10 @@ class DragZoomCanvas extends React.Component<Props, State> {
     const context2D = canvas.getContext('2d');
     context2D.clearRect(0, 0, width, height);
     React.Children.forEach(props.children, child => {
-      if(child.type === DragZoomCanvas.Path) {
+      if(child && child.type === DragZoomCanvas.Path) {
         let { path, color, shape } = child.props;
         const id = child.key;
-        this.props.controlPaint(context2D, {id: child.key, path: this.getAllDrawPosition(path, props), color, shape});
+        this.props.controlPaint(context2D, {id: child.key, ...child.props, path: this.getAllDrawPosition(path, props)});
       }
     });
   };
@@ -86,7 +86,7 @@ class DragZoomCanvas extends React.Component<Props, State> {
   getActualPosition = (e: MouseEvent) => {
     const { scale } = this.props;
     const { x, y } = offsetXYFromParent(e, this.canvasRef.current.offsetParent);
-    return [x / scale, y / scale];
+    return [~~(x / scale), ~~(y / scale)];
   };
   render() {
     const { currentSize, capture } = this.props;
@@ -99,7 +99,7 @@ class DragZoomCanvas extends React.Component<Props, State> {
         onMouseMove={e => this.capture(e, this.props.onMouseMove)}
         onClick={e => this.capture(e, this.props.onClick)}
         onDoubleClick={e => this.capture(e, this.props.onDoubleClick)}
-        style={{ position: 'absolute', top: '0px', left: '0px', width: currentSize.width, height: currentSize.height, zIndex: capture ? 1 : -1 }}>
+        style={{ position: 'absolute', top: '0px', left: '0px', width: currentSize.width, height: currentSize.height, zIndex: capture ? 1 : undefined }}>
       </canvas>
     )
   }

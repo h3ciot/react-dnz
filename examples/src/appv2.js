@@ -39,6 +39,7 @@ export default class App extends React.Component{
 
 
     componentDidMount() {
+        console.log(this.drawingRef);
     }
 
     controlPaint = (context, { id, path}) => {

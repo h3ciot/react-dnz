@@ -219,10 +219,10 @@ export default class DragZoom extends React.Component<Props, State> {
     }
     imgLoad = (e: Event) => {
         const { src } = this.imgRef.current;
-        if(src !== this.props.img) {
+        if(!src.endsWith(this.props.img)) {
             return;
         }
-        this.props.onSizeChange({ width: 0, height: 0}, 1, true);
+        this.props.onSizeChange({ width: 0, height: 0 }, 1, false);
         this.setState({ dragPosition: { x: 0, y: 0} });
         const isSvg = src.endsWith('.svg') || src.endsWith('.SVG') || src.indexOf('data:image/svg+xml;') === 0;
         const { target } = e;
@@ -239,7 +239,7 @@ export default class DragZoom extends React.Component<Props, State> {
     };
 
     setImgSize = (err: Object | null, url: string, size: Size) => {
-        if(url !== this.props.img) {
+        if(!url.endsWith(this.props.img)) {
             return false;
         }
         if(err) {
@@ -303,6 +303,10 @@ export default class DragZoom extends React.Component<Props, State> {
         this.props.onSizeChange(imgSize, scale, false);
     };
     onDragStop = (e: Event, data: DraggableData) => {
+        const { dragPosition } = this.state;
+        if(dragPosition.x === data.x && dragPosition.y === data.y) {
+            return;
+        }
         this.setState({ dragPosition: { x: data.x, y: data.y }});
         this.props.onDragStop(e, { x: data.x, y: data.y });
     };
