@@ -284,6 +284,17 @@ export default class DragZoom extends React.Component<Props, State> {
         }
         this.clearScaleShowTimer = setTimeout(() => this.setState({ showScale: false }), 500);
     };
+    imgLoadError = () => {
+        const { src } = this.imgRef.current;
+        if(!src.endsWith(this.props.img)) {
+            return;
+        }
+        this.props.onSizeChange({ width: 0, height: 0}, 1, true);
+        this.setState({
+            imgSize: { width: 0, height: 0},
+            currentSize: { width: 0, height: 0},
+            position: { x: 0, y: 0}, scale: 1 });
+    };
     resetPosition = (imgSize: Size = this.state.imgSize) => {
         const { containerSize: { width, height } = {} } = this.state;
         let scale = 1;
@@ -321,7 +332,7 @@ export default class DragZoom extends React.Component<Props, State> {
                 <div ref={this.containerRef} className="drag-zoom-containers" style={style} onWheel={this.onWheel} onContextMenu={stopRightKey}>
                     <Draggable position={dragPosition} onStop={this.onDragStop} allowAnyClick={allowAnyClick} disabled={!draggable} bounds={{ left: -boundX, right: boundX, top: -boundY, bottom: boundY }}>
                         <div className="drag-warp" style={{ width, height, left: x, top: y }}>
-                            <img className="img-container" draggable="false" ref={this.imgRef} src={img} onLoad={this.imgLoad} alt=""/>
+                            <img className="img-container" draggable="false" ref={this.imgRef} src={img} onLoad={this.imgLoad} alt="" onError={this.imgLoadError}/>
                             {currentSize.width && currentSize.height ? this.props.children : null}
                         </div>
                     </Draggable>
