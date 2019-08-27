@@ -4,6 +4,7 @@
 import React from 'react';
 import type { Point, Position } from './Type';
 import connect from './ContextUtils';
+import MarkerCluster from './MarkerCluster';
 function noop() {}
 type Props = {
   style: Object,
@@ -12,6 +13,11 @@ type Props = {
   onDrag: (id: string, position: Position, e: Event) => null,
   onDragStop: (id: string, position: Position, e: Event ) => null,
   currentSize: { width: number, height: number },
+  renderClusterMarker?: Function,
+  polymerization?: boolean,
+  gridSize?: number,
+  minClusterSize?: number,  
+  onClusterClick?: (position: Position, markers: Array<Object>, e: Event) => null,  
 }
 type State = {
   controlledPositions: {[string]: Point} // 点位信息
@@ -22,7 +28,11 @@ class DragZoomItems extends React.Component<Props, State> {
   static defaultProps = {
     onDrag: noop,
     onDragStop: noop,
+    polymerization: true,
+    gridSize: 60,
+    minClusterSize: 2,
   };
+  clusters: Object;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -31,15 +41,36 @@ class DragZoomItems extends React.Component<Props, State> {
   }
 
   resetPosition = (props: Props) => {
+    const { polymerization } = props;
+    this.clusters && this.clusters.clear();
+    this.clusters = new MarkerCluster({ gridSize: props.gridSize, minClusterSize: props.minClusterSize });
     const controlledPositions  = {};
     React.Children.forEach(props.children, (child) => {
       if(child) {
         const { key: id, props: childProps } = child;
         const { position, offset = { top: 0, left: 0} } = childProps;
-        controlledPositions[id] = this.calculatePosition({...position, offset}, props);
-        controlledPositions[id].id = id
+        const newPosition = this.calculatePosition({...position, offset}, props);
+        newPosition.id = id;
+        if(polymerization) {
+          this.clusters.addMarker(newPosition);
+        } else {
+          controlledPositions[id] = this.calculatePosition({...position, offset}, props);
+        }
+        // controlledPositions[id] = this.calculatePosition({...position, offset}, props);
+        // controlledPositions[id].id = id
       }
     });
+    if(polymerization) {
+      // this.clusters && this.clusters.clear();
+      // this.clusters = new MarkerCluster({ gridSize: props.gridSize, minClusterSize: props.minClusterSize });
+      // this.clusters.addMarker(Object.values(controlledPositions));
+      this.clusters.initClusters();
+      console.log(this.clusters.clusters);
+      this.clusters.points.forEach(point => {
+        // console.log(point);
+        controlledPositions[point.id] = point;
+      })
+    }
     return controlledPositions;
   };
   componentWillReceiveProps(nextProps: Props) {
@@ -71,7 +102,7 @@ class DragZoomItems extends React.Component<Props, State> {
     e.stopPropagation();
     if(this.props.onDrag) {
       const { actualPoint } = this.getActualPosition(id, position);
-      this.props.onDrag(actualPoint, e);
+      this.props.onDrag(id, actualPoint, e);
     }
   };
 
@@ -103,9 +134,14 @@ class DragZoomItems extends React.Component<Props, State> {
       this.props.onDragStop(id, actualPoint, e);
     }
   };
-
+  renderChildren = () => {
+    
+  };
   renderItem = (child: any) => {
     if(child.type && child.type.isDragzoomItem === "DragzoomItem.V2") {
+      if(this.props.polymerization) {
+        
+      }
       const { key: id } = child;
       const { controlledPositions } = this.state;
       const childProps = {
@@ -119,11 +155,23 @@ class DragZoomItems extends React.Component<Props, State> {
     return null;
   };
 
+  renderCommonItem = (child: any) => {
+    const { key: id } = child;
+    const { controlledPositions } = this.state;
+    const childProps = {
+      id,
+      position: controlledPositions[id] || {},
+      onDragStop: this.onDragStop,
+      onDrag: this.onDrag,
+    };
+    return React.cloneElement(child, childProps)
+  };
   render() {
     const { style } = this.props;
     return (
       <div className="drag-zoom-items-containers" style={{ ...style, position: 'absolute', left: 0, top: 0, width: 0, height: 0 }}>
         {React.Children.map(this.props.children, this.renderItem)}
+        {this.renderChildren()}
       </div>
     )
   }

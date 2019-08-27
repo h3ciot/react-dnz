@@ -16,13 +16,13 @@ export default class App extends React.Component{
         this.drawingRef = React.createRef();
         const list = Mock.mock({ 'list|2': [{ 'data|2': [{'x|1-1000':1, 'y|1-1000':1}]}]}).list;
         this.state = {
-            img: 'http://www.pconline.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
+            img: 'http://www.pconlinew.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
             // img: svg,
             polygonList: list.map((item, i) => ( { id: i, path: item.data.map(i => [i.x, i.y])})),
             // polygonList: [],
             currentPolygon: [],
             points: Mock.mock({
-              "points|2": [{
+              "points|200": [{
                 "x|-100-1000":1,
                 "y|-100-1000":1
               }]
@@ -46,8 +46,8 @@ export default class App extends React.Component{
         // if(id === '10') {
         //     return
         // }
-        console.log(id);
-        console.log(path);
+        // console.log(id);
+        // console.log(path);
         context.strokeStyle = '#000000';
         context.fillStyle = '#ff000050';
         context.lineWidth = 5;
@@ -76,7 +76,7 @@ export default class App extends React.Component{
     }
 
     capturePosition = (position) => {
-        console.log('mousedown')
+        // console.log('mousedown')
         const { currentPolygon } = this.state
         this.setState({currentPolygon: [...this.onceDrag, position]})
         this.startPosition = position
@@ -84,8 +84,8 @@ export default class App extends React.Component{
     }
 
     startMove = (position, e) => {
-        console.log('mousemove');
-        console.log(position);
+        // console.log('mousemove');
+        // console.log(position);
         this.setState({currentPolygon: [...this.onceDrag, positions[1]]})
     }
 
@@ -94,12 +94,12 @@ export default class App extends React.Component{
         if(JSON.stringify(this.startPosition) !== JSON.stringify(position)) {
             this.onceDrag.push(position)
         }
-        console.log('mouseup')
+        // console.log('mouseup')
         this.setState({currentPolygon: this.onceDrag})
     }
 
     doubleClick = (position) => {
-        console.log('doubleclik')
+        // console.log('doubleclik')
         const { polygonList, currentPolygon } = this.state
         polygonList.push(currentPolygon)
         this.onceDrag = []
@@ -109,35 +109,35 @@ export default class App extends React.Component{
         })
     }
     fixContent = (position, placement) => {
-        console.log(this.drawingRef);
+        // console.log(this.drawingRef);
         this.drawingRef.current.fixContent(position, placement);
     };
     onSizeChange=(imgSize, scale, loading) =>{
-        console.log('imgSize:', imgSize);
-        console.log('scale:', scale);
-        console.log('loading:', loading);
+        // console.log('imgSize:', imgSize);
+        // console.log('scale:', scale);
+        // console.log('loading:', loading);
     };
     onClick = (position) => {
-        console.log('click');
-        console.log(position);
+        // console.log('click');
+        // console.log(position);
         this.onceDrag.push(position);
         this.setState({ currentPolygon: this.onceDrag })
     };
     onMouseMove = (position) => {
-        console.log('mousemove');
+        // console.log('mousemove');
         const currentPolygon = this.state.currentPolygon.slice(0, this.onceDrag.length);
         currentPolygon.push(position);
         this.setState({ currentPolygon})
     };
     onDoubleClick = (position) => {
-        console.log('dblclick');
+        // console.log('dblclick');
         this.onceDrag.push(position);
         this.setState({ currentPolygon: this.onceDrag, capture: false })
         this.onceDrag = [];
     };
     render() {
         const { polygonList, currentPolygon } = this.state
-        console.log('current', polygonList);
+        // console.log('current', polygonList);
         return (
                 <DragZoom
                     key="1"
