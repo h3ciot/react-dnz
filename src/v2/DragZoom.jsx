@@ -289,7 +289,7 @@ export default class DragZoom extends React.Component<Props, State> {
         if(!src.endsWith(this.props.img)) {
             return;
         }
-        this.props.onSizeChange({ width: 0, height: 0}, 1, true);
+        this.props.onSizeChange({ width: 0, height: 0}, 1, false);
         this.setState({
             imgSize: { width: 0, height: 0},
             currentSize: { width: 0, height: 0},

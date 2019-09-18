@@ -4,8 +4,6 @@
 import React from 'react';
 import type { Point, Position } from './Type';
 import connect from './ContextUtils';
-import MarkerCluster from './MarkerCluster';
-import Draggable from "react-draggable";
 function noop() {}
 type Props = {
   style: Object,
@@ -14,14 +12,9 @@ type Props = {
   onDrag: (id: string, position: Position, e: Event) => null,
   onDragStop: (id: string, position: Position, e: Event ) => null,
   currentSize: { width: number, height: number },
-  renderClusterMarker?: (markers: Array<Object>) => Object,
-  polymerization?: boolean,
-  gridSize?: number,
-  minClusterSize?: number,
 }
 type State = {
-  controlledPositions: {[string]: Point}, // 点位信息
-  clusters: Array,
+  controlledPositions: {[string]: Point} // 点位信息
 }
 class DragZoomItems extends React.Component<Props, State> {
 
@@ -29,54 +22,29 @@ class DragZoomItems extends React.Component<Props, State> {
   static defaultProps = {
     onDrag: noop,
     onDragStop: noop,
-    polymerization: true,
-    gridSize: 60,
-    minClusterSize: 2,
   };
-  clusters: Object;
   constructor(props: Props) {
     super(props);
-    this.state = this.resetPosition(props); // 点位信息
+    this.state = {
+      controlledPositions: this.resetPosition(props) // 点位信息
+    };
   }
 
   resetPosition = (props: Props) => {
-    const { polymerization } = props;
-    this.clusters && this.clusters.clear();
-    this.clusters = new MarkerCluster({ gridSize: props.gridSize, minClusterSize: props.minClusterSize });
     const controlledPositions  = {};
-    let clusters = [];
     React.Children.forEach(props.children, (child) => {
       if(child) {
         const { key: id, props: childProps } = child;
         const { position, offset = { top: 0, left: 0} } = childProps;
-        const newPosition = this.calculatePosition({...position, offset}, props);
-        newPosition.id = id;
-        if(polymerization) {
-          this.clusters.addMarker(newPosition);
-        } else {
-          controlledPositions[id] = this.calculatePosition({...position, offset}, props);
-        }
-        // controlledPositions[id] = this.calculatePosition({...position, offset}, props);
-        // controlledPositions[id].id = id
+        controlledPositions[id] = this.calculatePosition({...position, offset}, props);
+        controlledPositions[id].id = id
       }
     });
-    if(polymerization) {
-      // this.clusters && this.clusters.clear();
-      // this.clusters = new MarkerCluster({ gridSize: props.gridSize, minClusterSize: props.minClusterSize });
-      // this.clusters.addMarker(Object.values(controlledPositions));
-      this.clusters.initClusters();
-      console.log(this.clusters.clusters);
-      this.clusters.points.forEach(point => {
-        // console.log(point);
-        controlledPositions[point.id] = point;
-      });
-      clusters = [].concat(this.clusters.clusters);
-    }
-    return {controlledPositions, clusters };
+    return controlledPositions;
   };
   componentWillReceiveProps(nextProps: Props) {
     if (this.props.children !== nextProps.children || this.props.scale !== nextProps.scale ) {
-      this.setState({ ...this.resetPosition(nextProps) })
+      this.setState({ controlledPositions: this.resetPosition(nextProps) })
     }
   }
     /**
@@ -103,7 +71,7 @@ class DragZoomItems extends React.Component<Props, State> {
     e.stopPropagation();
     if(this.props.onDrag) {
       const { actualPoint } = this.getActualPosition(id, position);
-      this.props.onDrag(id, actualPoint, e);
+      this.props.onDrag(actualPoint, e);
     }
   };
 
@@ -135,22 +103,9 @@ class DragZoomItems extends React.Component<Props, State> {
       this.props.onDragStop(id, actualPoint, e);
     }
   };
-  renderChildren = () => {
-      const { clusters } = this.state;
-      const { renderClusterMarker = this.defaultRenderCluster } = this.props;
-    return clusters.map((cluster, i) =>           
-            <div className="drag-items-cluster" draggable="false" style={{ position: 'absolute', top: cluster.cluster_y, left: cluster.cluster_x }} key={'cluster_' + i}>
-        {renderClusterMarker(cluster.childrens)}
-    </div>);
-  };
-  defaultRenderCluster = (childrens: Array) => {
-      return <div>{childrens.length}</div>;
-  };
+
   renderItem = (child: any) => {
     if(child.type && child.type.isDragzoomItem === "DragzoomItem.V2") {
-      if(this.props.polymerization) {
-        
-      }
       const { key: id } = child;
       const { controlledPositions } = this.state;
       const childProps = {
@@ -164,23 +119,11 @@ class DragZoomItems extends React.Component<Props, State> {
     return null;
   };
 
-  renderCommonItem = (child: any) => {
-    const { key: id } = child;
-    const { controlledPositions } = this.state;
-    const childProps = {
-      id,
-      position: controlledPositions[id] || {},
-      onDragStop: this.onDragStop,
-      onDrag: this.onDrag,
-    };
-    return React.cloneElement(child, childProps)
-  };
   render() {
     const { style } = this.props;
     return (
       <div className="drag-zoom-items-containers" style={{ ...style, position: 'absolute', left: 0, top: 0, width: 0, height: 0 }}>
         {React.Children.map(this.props.children, this.renderItem)}
-        {this.renderChildren()}
       </div>
     )
   }

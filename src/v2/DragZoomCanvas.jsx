@@ -86,7 +86,7 @@ class DragZoomCanvas extends React.Component<Props, State> {
   getActualPosition = (e: MouseEvent) => {
     const { scale } = this.props;
     const { x, y } = offsetXYFromParent(e, this.canvasRef.current.offsetParent);
-    return [~~(x / scale), ~~(y / scale)];
+    return [Math.max(~~(x / scale), 0), Math.max(~~(y / scale),0)];
   };
   render() {
     const { currentSize, capture } = this.props;
