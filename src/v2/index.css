@@ -4,6 +4,18 @@
   height: 100%;
   overflow: hidden;
 }
+.drag-items-cluster {
+    width: 52px;
+    height: 52px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    line-height: 52px;
+    background: #0074D9;
+    border-radius: 50%;
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    cursor: pointer;
+}
 .drag-zoom-containers > .drag-warp {
   position: absolute;
 }

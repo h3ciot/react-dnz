@@ -55,5 +55,5 @@ export function offsetXYFromParent(evt: {clientX: number, clientY: number}, offs
   const x = evt.clientX + offsetParent.scrollLeft - offsetParentRect.left;
   const y = evt.clientY + offsetParent.scrollTop - offsetParentRect.top;
 
-  return {x, y};
+  return {x: Math.max(0,x), y: Math.max(0,y)};
 };

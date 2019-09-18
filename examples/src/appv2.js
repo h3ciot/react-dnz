@@ -16,7 +16,7 @@ export default class App extends React.Component{
         this.drawingRef = React.createRef();
         const list = Mock.mock({ 'list|2': [{ 'data|2': [{'x|1-1000':1, 'y|1-1000':1}]}]}).list;
         this.state = {
-            img: 'http://www.pconlinew.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
+            img: 'http://www.pconline.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
             // img: svg,
             polygonList: list.map((item, i) => ( { id: i, path: item.data.map(i => [i.x, i.y])})),
             // polygonList: [],
