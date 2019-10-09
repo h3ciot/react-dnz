@@ -158,6 +158,7 @@ class DragZoomPolygon extends React.Component<Props, State> {
     context2D.clearRect(0, 0, width, height);
     const paths = [];
     const points = [];
+    const customPath = [];
     polygons.forEach(polygon => {
         const { path: oldPath, color, shape, vertex = true, dash, id, custom } = polygon;
         const path = this.getAllDrawPosition(oldPath, props);
@@ -167,11 +168,14 @@ class DragZoomPolygon extends React.Component<Props, State> {
           }
           paths.push({ path, shape, dash });
         } else {
-          controlPaint(context2D, { id, path, color, shape, vertex, dash });
+          customPath.push({ id, path, color, shape, vertex, dash });
         }
     });
     this.renderPolygons(paths);
     this.renderPoint(points);
+    customPath.forEach(item => {
+        controlPaint(context2D, item);
+    })
   };
   /** 转换成绘制坐标，取整 */
   getAllDrawPosition = (position: Path, props: Props = this.props) => {
