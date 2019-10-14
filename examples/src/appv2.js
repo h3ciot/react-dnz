@@ -1,6 +1,6 @@
 import React from 'react'
 import { V2 } from 'react-dnz';
-const { DragZoom, DragZoomItems, DragZoomItem, DragZoomPolygon, DrawType, DragZoomCanvas } = V2;
+const { DragZoom, DragZoomItems, DragZoomItem, DragZoomPolygon, DrawType, DragZoomCanvas, DragZoomHotMap } = V2;
 import { Popover, Button } from 'antd';
 import './index.css';
 import Mock from 'mockjs';
@@ -15,6 +15,7 @@ export default class App extends React.Component{
         this.onceDrag = []
         this.drawingRef = React.createRef();
         const list = Mock.mock({ 'list|2': [{ 'data|2': [{'x|1-1000':1, 'y|1-1000':1}]}]}).list;
+        console.log(list);
         this.state = {
             img: 'http://www.pconline.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
             // img: svg,
@@ -31,7 +32,14 @@ export default class App extends React.Component{
             x: 100,
             y: 100,
             draw: true,
+            hotPoints: Mock.mock({
+              "points|20000": [{
+                "x|-100-1000":1,
+                "y|-100-1000":1
+              }]
+            }).points.map(item => [item.x, item.y]),
         }
+        console.log(this.state);
         window.resetState = () => {
             this.setState({ img: svg });
         };
@@ -136,7 +144,7 @@ export default class App extends React.Component{
         this.onceDrag = [];
     };
     render() {
-        const { polygonList, currentPolygon } = this.state
+        const { polygonList, currentPolygon, hotPoints } = this.state
         // console.log('current', polygonList);
         return (
                 <DragZoom
@@ -168,6 +176,7 @@ export default class App extends React.Component{
                     {/*    {//<Polygon key='10' polygonDrag path={this.state.currentPolygon} />*/}
                     {/*    }*/}
                     </DragZoomPolygon>
+                    <DragZoomHotMap points={hotPoints}/>
                     <DragZoomCanvas
                         controlPaint={this.controlPaint}
                         capture={false}

@@ -8,6 +8,7 @@ import DragZoomItems from './DragZoomItems';
 import DragZoomItem from './DragZoomItem';
 import DragZoomPolygon from './DragZoomPolygon';
 import DragZoomCanvas from './DragZoomCanvas';
+import DragZoomHotMap from './DragZoomHotMap';
 import { CIRCLE, POLYGON, RECTANGLE } from "./Type";
 
 const V2 = {
@@ -16,6 +17,7 @@ const V2 = {
   DragZoomItem,
   DragZoomPolygon,
   DragZoomCanvas,
+  DragZoomHotMap,
   DrawType: {
     CIRCLE, POLYGON, RECTANGLE,
   },
