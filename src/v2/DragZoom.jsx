@@ -32,6 +32,7 @@ type Props = {
     draggable:boolean,
     allowAnyClick: boolean,
     maxScale: number,
+    onDragStart: Function,
 }
 
 type State = {
@@ -55,6 +56,7 @@ export default class DragZoom extends React.Component<Props, State> {
         onSizeChange: noop,
         allowAnyClick: false,
         onDragStop: noop,
+        onDragStart: noop,
     };
     constructor(props: Props) {
         super(props);
@@ -330,7 +332,7 @@ export default class DragZoom extends React.Component<Props, State> {
         return (
             <CurrentSizeContext.Provider value={{ currentSize, scale}}>
                 <div ref={this.containerRef} className="drag-zoom-containers" style={style} onWheel={this.onWheel} onContextMenu={stopRightKey}>
-                    <Draggable position={dragPosition} onStop={this.onDragStop} allowAnyClick={allowAnyClick} disabled={!draggable} bounds={{ left: -boundX, right: boundX, top: -boundY, bottom: boundY }}>
+                    <Draggable position={dragPosition} onStart={this.props.onDragStart} onStop={this.onDragStop} allowAnyClick={allowAnyClick} disabled={!draggable} bounds={{ left: -boundX, right: boundX, top: -boundY, bottom: boundY }}>
                         <div className="drag-warp" style={{ width, height, left: x, top: y }}>
                             <img className="img-container" draggable="false" ref={this.imgRef} src={img} onLoad={this.imgLoad} alt="" onError={this.imgLoadError}/>
                             {currentSize.width && currentSize.height ? this.props.children : null}
