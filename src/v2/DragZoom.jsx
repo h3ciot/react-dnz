@@ -269,7 +269,7 @@ export default class DragZoom extends React.Component<Props, State> {
         if(!imgSize.width || !imgSize.height) {
             return false;
         }
-        const scale = ~~(oldScale * 100 + 10 * (e.deltaY > 0 ? 1 : -1)) / 100;
+        const scale = ~~(oldScale * 100 + 10 * (e.deltaY > 0 ? -1 : 1)) / 100;
         if(scale <= 0 || scale > this.props.maxScale) {
             return false;
         }
