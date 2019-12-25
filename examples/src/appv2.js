@@ -40,6 +40,10 @@ export default class App extends React.Component{
             }).points.map(item => [item.x, item.y]),
         }
         console.log(this.state);
+        this.state.hotPoints = [];
+        for(let i = 1; i < 2000; i+=5) {
+          this.state.hotPoints.push([i,i]);
+        }
         window.resetState = () => {
             this.setState({ img: svg });
         };
@@ -189,16 +193,16 @@ export default class App extends React.Component{
                         {/*)}*/}
                             <Path key='aaaa' path={currentPolygon}/>
                     </DragZoomCanvas>
-                    <DragZoomItems>
-                        <DragZoomItem key="top" position={{x: this.state.x, y: this.state.y}} offset={{top:0,left:0}} >
-                            <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">
-                                <Button onClick={() => this.fixContent({ x: this.state.x, y: this.state.y, width: 232, height: 334, offset:{top:10,left:10} }, 'bottomRight')}>topLeft</Button>
-                            </Popover>
-                        </DragZoomItem>
-                        {this.state.points.map((point,i) => <DragZoomItem key={i} position={{x:point.x, y:point.y}} offset={{top:10,left:10}} >
-                            <span style={{background:'#000',display:'inline-block',width:'20px',height:'20px'}} />
-                        </DragZoomItem>)}
-                    </DragZoomItems>
+                    {/*<DragZoomItems>*/}
+                    {/*    <DragZoomItem key="top" position={{x: this.state.x, y: this.state.y}} offset={{top:0,left:0}} >*/}
+                    {/*        <Popover autoAdjustOverflow={false} placement="bottomRight" content={<div style={{ width: 200, height: 300, background: '#0f0'}}/>} trigger="click">*/}
+                    {/*            <Button onClick={() => this.fixContent({ x: this.state.x, y: this.state.y, width: 232, height: 334, offset:{top:10,left:10} }, 'bottomRight')}>topLeft</Button>*/}
+                    {/*        </Popover>*/}
+                    {/*    </DragZoomItem>*/}
+                    {/*    {this.state.points.map((point,i) => <DragZoomItem key={i} position={{x:point.x, y:point.y}} offset={{top:10,left:10}} >*/}
+                    {/*        <span style={{background:'#000',display:'inline-block',width:'20px',height:'20px'}} />*/}
+                    {/*    </DragZoomItem>)}*/}
+                    {/*</DragZoomItems>*/}
                 </DragZoom>
         )
     }

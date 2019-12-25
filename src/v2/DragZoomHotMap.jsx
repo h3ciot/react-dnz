@@ -60,7 +60,7 @@ class DragZoomHotMap extends React.Component<Props, State> {
     }
     
     redrawCanvas = (props: Props) => {
-        console.time('begin');
+        // console.time('begin');
         const canvas = this.canvasRef.current;
         if(!canvas) {
             throw(new Error("can't get canvas context"));
@@ -71,16 +71,16 @@ class DragZoomHotMap extends React.Component<Props, State> {
         const context2D = canvas.getContext('2d');
         context2D.clearRect(0, 0, width, height);
         context2D.putImageData(this.drawHot(props), 0, 0);
-        console.timeEnd('begin');
+        // console.timeEnd('begin');
     };
     drawHot = props => {
         const tempCanvas = document.createElement('canvas');
-        const { currentSize: { width, height }, points } = props;
+        const { currentSize: { width, height }, points, scale } = props;
         tempCanvas.width = width;
         tempCanvas.height = height;
         const newPoints = this.getAllDrawPosition(points, props);
         const ctx = tempCanvas.getContext('2d');
-        const radius = 15;
+        const radius = Math.max(Math.ceil(15 * scale), 1);
         newPoints.forEach(function(point) {
             ctx.beginPath();
             const [x, y] = point;
