@@ -4,16 +4,16 @@
 import React from 'react'
 import type { Size, Path } from './Type';
 import connect from './ContextUtils';
+import { Store, RadiusTpls } from "./HotMapUtils";
 type Props = {
     currentSize: Size,
     scale: number,
     points: Path;
     hotColor: { [key: string]: string },
-    styleOption: {
-        minOpacity?: 0,
-        maxOpacity?: 0.8,
-        
-    }
+    minOpacity: number,
+    maxOpacity: number,
+    blur: number,
+    opacity: number,
 }
 
 type State = {
@@ -27,14 +27,18 @@ class DragZoomHotMap extends React.Component<Props, State> {
         scale: 1,
         points: [],
         hotColor: {
-            '0.2': 'rgba(0,0,255,0.2)',
+            '0': 'rgb(255,241,73)',
             '0.3': 'rgba(43,111,231,0.3)',
             '0.4': 'rgba(2,192,241,0.4)',
             '0.6': 'rgba(44,222,148,0.6)',
             '0.8': 'rgba(254,237,83,0.8)',
             '0.9': 'rgba(255,118,50,0.9)',
-            '1.0': 'rgba(255,64,28,1)',
-        }
+            '1.0': 'rgb(255,28,19)',
+        },
+        blur: 0.15,
+        // opacity: 1,
+        minOpacity: 0.5,
+        maxOpacity: 1,
     };
 
     canvasRef: Object;
@@ -60,7 +64,7 @@ class DragZoomHotMap extends React.Component<Props, State> {
     }
     
     redrawCanvas = (props: Props) => {
-        // console.time('begin');
+        console.time('begin');
         const canvas = this.canvasRef.current;
         if(!canvas) {
             throw(new Error("can't get canvas context"));
@@ -70,16 +74,98 @@ class DragZoomHotMap extends React.Component<Props, State> {
         canvas.height = height;
         const context2D = canvas.getContext('2d');
         context2D.clearRect(0, 0, width, height);
-        context2D.putImageData(this.drawHot(props), 0, 0);
-        // console.timeEnd('begin');
+        this.drawHot(props, context2D);
+        // context2D.putImageData(this.drawHotOld(props), 0, 0);
+        console.timeEnd('begin');
     };
-    drawHot = props => {
-        const tempCanvas = document.createElement('canvas');
-        const { currentSize: { width, height }, points, scale } = props;
-        tempCanvas.width = width;
-        tempCanvas.height = height;
+    drawHot = (props, ctx) => {
+        const shadowCanvas = document.createElement('canvas');
+        const { currentSize: { width, height }, points, scale, blur, opacity, minOpacity, maxOpacity } = props;
+        const _opacity = opacity * 255;
+        const _minOpacity= minOpacity * 255;
+        const _maxOpacity= maxOpacity * 255;
+        shadowCanvas.width = width;
+        shadowCanvas.height = height;
         const newPoints = this.getAllDrawPosition(points, props);
-        const ctx = tempCanvas.getContext('2d');
+        const shadowCtx = shadowCanvas.getContext('2d');
+        const radius = Math.max(Math.ceil(15 * scale), 1);
+        console.log(radius);
+        const renderBounder = [width, height, 0, 0];
+        const store = new Store(newPoints);
+        const tpl = RadiusTpls.getRadius(radius, blur);
+        newPoints.forEach(function(point) {
+            const [x, y] = point;
+            const globalAlpha = store.getGlobalAlpha(x, y);
+            shadowCtx.globalAlpha = globalAlpha;
+            const rectX = x - radius;
+            const rectY = y - radius;
+            shadowCtx.drawImage(tpl, rectX, rectY);
+            // 最小化更新区域
+            if (rectX < renderBounder[0]) {
+                renderBounder[0] = rectX;
+            }
+            if (rectY < renderBounder[1]) {
+                renderBounder[1] = rectY;
+            }
+            if (rectX + 2*radius > renderBounder[2]) {
+                renderBounder[2] = rectX + 2*radius;
+            }
+            if (rectY + 2*radius > renderBounder[3]) {
+                renderBounder[3] = rectY + 2*radius;
+            }
+        });
+        let [x, y, updateWidth, updateHeight] = renderBounder;
+        if (x < 0) {
+            x = 0;
+        }
+        if (y < 0) {
+            y = 0;
+        }
+        if (x + updateWidth > width) {
+            updateWidth = width - x;
+        }
+        if (y + updateHeight > height) {
+            updateHeight = height - y;
+        }
+        console.log(x, y, updateWidth, updateHeight, width, height);
+        const img = shadowCtx.getImageData(x,y,updateWidth, updateHeight);
+        let palette = this.hotColor; //取色面板
+        let imgData = img.data;
+        let len = imgData.length;
+        for (let i = 3; i < len; i += 4) {
+            let alpha = imgData[i];
+            let offset = alpha * 4;
+            if (!offset) {
+                continue;
+            }
+            let finalAlpha;
+            if (_opacity > 0) {
+                finalAlpha = _opacity;
+            } else {
+                if (alpha < _maxOpacity) {
+                    if (alpha < _minOpacity) {
+                        finalAlpha = _minOpacity;
+                    } else {
+                        finalAlpha = alpha;
+                    }
+                } else {
+                    finalAlpha = _maxOpacity;
+                }
+            }
+            imgData[i - 3] = palette[offset];
+            imgData[i - 2] = palette[offset + 1];
+            imgData[i - 1] = palette[offset + 2];
+            imgData[i] = finalAlpha;
+        }
+        ctx.putImageData(img, x, y);
+    };
+    drawHotOld = props => {
+        const shadowCanvas = document.createElement('canvas');
+        const { currentSize: { width, height }, points, scale, blur } = props;
+        shadowCanvas.width = width;
+        shadowCanvas.height = height;
+        const newPoints = this.getAllDrawPosition(points, props);
+        const ctx = shadowCanvas.getContext('2d');
         const radius = Math.max(Math.ceil(15 * scale), 1);
         newPoints.forEach(function(point) {
             ctx.beginPath();

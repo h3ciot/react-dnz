@@ -41,9 +41,12 @@ export default class App extends React.Component{
         }
         console.log(this.state);
         this.state.hotPoints = [];
-        for(let i = 1; i < 2000; i+=5) {
+        for(let i = 1; i < 200; i++) {
           this.state.hotPoints.push([i,i]);
         }
+      for(let i = 1; i < 50; i++) {
+        this.state.hotPoints.push([200,200]);
+      }
         window.resetState = () => {
             this.setState({ img: svg });
         };
