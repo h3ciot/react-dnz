@@ -13,7 +13,14 @@ type Props = {
     minOpacity: number,
     maxOpacity: number,
     blur: number,
+    radius: number,
     opacity: number,
+    minOpacity: number,
+    maxOpacity: number,
+    radiusWithZoom: boolean,
+    minRadius: number,
+    maxRadius: number,
+    absoluteHot: boolean,
 }
 
 type State = {
@@ -27,18 +34,23 @@ class DragZoomHotMap extends React.Component<Props, State> {
         scale: 1,
         points: [],
         hotColor: {
-            '0': 'rgb(255,241,73)',
+            '0.2': 'rgba(0,0,255,0.2)',
             '0.3': 'rgba(43,111,231,0.3)',
             '0.4': 'rgba(2,192,241,0.4)',
             '0.6': 'rgba(44,222,148,0.6)',
             '0.8': 'rgba(254,237,83,0.8)',
             '0.9': 'rgba(255,118,50,0.9)',
-            '1.0': 'rgb(255,28,19)',
+            '1.0': 'rgba(255,64,28,1)',
         },
         blur: 0.15,
         // opacity: 1,
-        minOpacity: 0.5,
+        minOpacity: 0,
         maxOpacity: 1,
+        radius: 20,
+        radiusWithZoom: true,
+        minRadius: 2,
+        maxRadius: 40,
+        absoluteHot: true,
     };
 
     canvasRef: Object;
@@ -64,23 +76,26 @@ class DragZoomHotMap extends React.Component<Props, State> {
     }
     
     redrawCanvas = (props: Props) => {
-        console.time('begin');
+        // console.time('begin');
         const canvas = this.canvasRef.current;
         if(!canvas) {
             throw(new Error("can't get canvas context"));
         }
-        const { currentSize: { width, height } } = props;
+        const { currentSize: { width, height }, absoluteHot } = props;
         canvas.width = width;
         canvas.height = height;
         const context2D = canvas.getContext('2d');
         context2D.clearRect(0, 0, width, height);
-        this.drawHot(props, context2D);
-        // context2D.putImageData(this.drawHotOld(props), 0, 0);
-        console.timeEnd('begin');
+        if(absoluteHot) {
+            context2D.putImageData(this.drawHotAbsolute(props), 0, 0);
+        } else {
+            this.drawHotRelative(props, context2D);
+        }
+        // console.timeEnd('begin');
     };
-    drawHot = (props, ctx) => {
+    drawHotRelative = (props: Props, ctx) => {
         const shadowCanvas = document.createElement('canvas');
-        const { currentSize: { width, height }, points, scale, blur, opacity, minOpacity, maxOpacity } = props;
+        const { currentSize: { width, height }, points, scale, blur, opacity, minOpacity, maxOpacity, radius, radiusWithZoom, maxRadius, minRadius } = props;
         const _opacity = opacity * 255;
         const _minOpacity= minOpacity * 255;
         const _maxOpacity= maxOpacity * 255;
@@ -88,17 +103,19 @@ class DragZoomHotMap extends React.Component<Props, State> {
         shadowCanvas.height = height;
         const newPoints = this.getAllDrawPosition(points, props);
         const shadowCtx = shadowCanvas.getContext('2d');
-        const radius = Math.max(Math.ceil(15 * scale), 1);
-        console.log(radius);
         const renderBounder = [width, height, 0, 0];
         const store = new Store(newPoints);
-        const tpl = RadiusTpls.getRadius(radius, blur);
+        let radiusTemp = radius;
+        if(radiusWithZoom) {
+            radiusTemp = Math.max(Math.min(Math.ceil(radiusTemp * scale), maxRadius), minRadius);
+        }
+        const tpl = RadiusTpls.getRadius(radiusTemp, blur);
         newPoints.forEach(function(point) {
             const [x, y] = point;
             const globalAlpha = store.getGlobalAlpha(x, y);
             shadowCtx.globalAlpha = globalAlpha;
-            const rectX = x - radius;
-            const rectY = y - radius;
+            const rectX = x - radiusTemp;
+            const rectY = y - radiusTemp;
             shadowCtx.drawImage(tpl, rectX, rectY);
             // 最小化更新区域
             if (rectX < renderBounder[0]) {
@@ -107,11 +124,11 @@ class DragZoomHotMap extends React.Component<Props, State> {
             if (rectY < renderBounder[1]) {
                 renderBounder[1] = rectY;
             }
-            if (rectX + 2*radius > renderBounder[2]) {
-                renderBounder[2] = rectX + 2*radius;
+            if (rectX + 2*radiusTemp > renderBounder[2]) {
+                renderBounder[2] = rectX + 2*radiusTemp;
             }
-            if (rectY + 2*radius > renderBounder[3]) {
-                renderBounder[3] = rectY + 2*radius;
+            if (rectY + 2*radiusTemp > renderBounder[3]) {
+                renderBounder[3] = rectY + 2*radiusTemp;
             }
         });
         let [x, y, updateWidth, updateHeight] = renderBounder;
@@ -127,8 +144,7 @@ class DragZoomHotMap extends React.Component<Props, State> {
         if (y + updateHeight > height) {
             updateHeight = height - y;
         }
-        console.log(x, y, updateWidth, updateHeight, width, height);
-        const img = shadowCtx.getImageData(x,y,updateWidth, updateHeight);
+        const img = shadowCtx.getImageData(x,y, updateWidth, updateHeight);
         let palette = this.hotColor; //取色面板
         let imgData = img.data;
         let len = imgData.length;
@@ -159,22 +175,25 @@ class DragZoomHotMap extends React.Component<Props, State> {
         }
         ctx.putImageData(img, x, y);
     };
-    drawHotOld = props => {
+    drawHotAbsolute = (props:Props) => {
         const shadowCanvas = document.createElement('canvas');
-        const { currentSize: { width, height }, points, scale, blur } = props;
+        const { currentSize: { width, height }, points, scale, radius, radiusWithZoom, maxRadius, minRadius } = props;
         shadowCanvas.width = width;
         shadowCanvas.height = height;
         const newPoints = this.getAllDrawPosition(points, props);
         const ctx = shadowCanvas.getContext('2d');
-        const radius = Math.max(Math.ceil(15 * scale), 1);
+        let radiusTemp = radius;
+        if(radiusWithZoom) {
+            radiusTemp = Math.max(Math.min(Math.ceil(radiusTemp * scale), maxRadius), minRadius);
+        }
         newPoints.forEach(function(point) {
             ctx.beginPath();
             const [x, y] = point;
-            let gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            let gradient = ctx.createRadialGradient(x, y, 0, x, y, radiusTemp);
             gradient.addColorStop(0, 'rgba(0,0,0,1)');
             gradient.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = gradient;
-            ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+            ctx.arc(x, y, radiusTemp, 0, Math.PI * 2, true);
             ctx.closePath();
             ctx.fill();
         });

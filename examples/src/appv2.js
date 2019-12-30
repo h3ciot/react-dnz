@@ -4,7 +4,7 @@ const { DragZoom, DragZoomItems, DragZoomItem, DragZoomPolygon, DrawType, DragZo
 import { Popover, Button } from 'antd';
 import './index.css';
 import Mock from 'mockjs';
-import svg from './svg.svg';
+import write from './white.png';
 const Polygon = DragZoomPolygon.Polygon;
 const Path = DragZoomCanvas.Path;
 export default class App extends React.Component{
@@ -17,7 +17,7 @@ export default class App extends React.Component{
         const list = Mock.mock({ 'list|2': [{ 'data|2': [{'x|1-1000':1, 'y|1-1000':1}]}]}).list;
         console.log(list);
         this.state = {
-            img: 'http://www.pconline.com.cn/pcedu/photo/0604/pic/060429cg03.jpg',
+            img: write,
             // img: svg,
             polygonList: list.map((item, i) => ( { id: i, path: item.data.map(i => [i.x, i.y])})),
             // polygonList: [],
