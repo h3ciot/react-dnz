@@ -95,8 +95,8 @@ export default class Dragzoom extends React.Component<Props, State> {
   initPosition: Position = { x: 0, y: 0 } // 图片初始化的位置
   lastPosition: Position = { x: 0, y: 0 } // 图片上一次位置
 
-  lastScale: {mouseX: number, mouseY: number}  // 鼠标移动后在图片中的位置
-  refreshScale: {mouseX: number, mouseY: number} // 缩放后在图片中的位置
+  lastScale: Position = {mouseX: 0, mouseY: 0}  // 鼠标移动后在图片中的位置
+  refreshScale: Position = {mouseX: 0, mouseY: 0} // 缩放后在图片中的位置
   currentPolygonPath: Path = [] // 当前自定义图层路径，计算之后的虚拟路径
   currentPolygon: { id: string, path: Path} = { id: '', path: [] } // 当前自定义图层路径, 真实路径
   constructor(props: Props) {
